@@ -32,12 +32,14 @@ dependencies {
     })
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.google.android.gms:play-services-auth:16.0.0'
     implementation 'com.google.android.gms:play-services-gcm:16.0.0'
     implementation 'com.google.android.gms:play-services-identity:15.0.1'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.firebase:firebase-database:16.0.3'
     implementation 'com.google.firebase:firebase-core:16.0.4'
+    implementation 'com.google.code.gson:gson:2.8.5'
     androidTestImplementation 'junit:junit:4.12'
 }
 

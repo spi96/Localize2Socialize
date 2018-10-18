@@ -1,5 +1,6 @@
 package com.example.spi.localize2socialize;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -16,16 +17,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
-import layout.events.EventsTab;
-import layout.friends.FriendsTab;
+import layout.EventsTab;
+import layout.FriendsTab;
+import viewmodels.MainActivityViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    private GoogleSignInAccount account = null;
+    private MainActivityViewModel viewModel = null;
 
     Context context;
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -68,9 +74,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        GoogleSignInAccount account = null;
         account = getIntent().getParcelableExtra("ACCOUNT");
+
+        viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        viewModel.setUser(account);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -88,10 +103,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            signOut();
         }
 
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
     /**
@@ -126,11 +141,21 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "EventsTab";
+                    return "Events";
                 case 1:
-                    return "FriendsTab";
+                    return "Friends";
             }
             return null;
         }
+    }
+
+    public void signOut() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        viewModel.signOut(this, mGoogleSignInClient);
     }
 }
