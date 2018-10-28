@@ -19,7 +19,7 @@ public class FriendsTabViewModel extends ViewModel {
         return friends.getValue();
     }
 
-    public List<User> getFriendREquests() {
+    public List<User> getFriendRequests() {
         if (friendRequests == null) {
             friendRequests.postValue(loadFriendRequests());
         }

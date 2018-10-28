@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/activity_horizontal_margin">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/friendItemCV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp"
+        app:cardElevation="@dimen/cardview_default_elevation"
+        app:cardCornerRadius="4dp"
+        app:cardBackgroundColor="@color/colorCardView">
+
+        <TextView
+            android:id="@+id/friend_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/colorFriendsText"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/action_button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:visibility="invisible">
+
+            <ImageButton
+                android:id="@+id/action_request_accept"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:src="@drawable/ic_request_accept"
+                android:backgroundTint="@color/colorAccept"
+                android:contentDescription="@string/accept_friend" />
+
+            <ImageButton
+                android:id="@+id/action_request_deny"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_request_decline"
+                android:backgroundTint="@color/colorDeny"
+                android:contentDescription="@string/deny_friend" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

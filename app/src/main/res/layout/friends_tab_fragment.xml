@@ -5,32 +5,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-    tools:context="layout.FriendsTab">
+    tools:context="layout.FriendsTab"
+    android:weightSum="10">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/friend_requests"
-        android:labelFor="@+id/friendRequests" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/friendRequests"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="2.7">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/friends"
-        android:labelFor="@+id/friends" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textScaleX="1.2"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:text="@string/friend_requests"
+            android:labelFor="@+id/friendRequests" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/friends"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/friendRequests"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
+        android:layout_height="2dp"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+        android:layout_marginVertical="@dimen/activity_vertical_margin"
+        android:background="@color/colorSeparator" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="7.3">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/friends"
+            android:labelFor="@+id/friends" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/friends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
+    </LinearLayout>
 
 </LinearLayout>
