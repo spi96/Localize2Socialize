@@ -1,4 +1,4 @@
-package viewmodels;
+package com.example.spi.localize2socialize.viewmodels;
 
 import android.app.Activity;
 import android.arch.lifecycle.ViewModel;
@@ -6,13 +6,11 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.example.spi.localize2socialize.LoginActivity;
-import com.example.spi.localize2socialize.MainActivity;
+import com.example.spi.localize2socialize.models.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-
-import models.User;
 
 public class MainActivityViewModel extends ViewModel {
     private User _user = null;

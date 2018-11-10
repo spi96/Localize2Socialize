@@ -1,8 +1,6 @@
-package layout.adapters;
+package com.example.spi.localize2socialize.layout.adapters;
 
-import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
@@ -12,12 +10,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.spi.localize2socialize.R;
+import com.example.spi.localize2socialize.models.Friend;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import models.Friend;
-import models.User;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsViewHolder> {
 
@@ -73,11 +68,26 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
         notifyDataSetChanged();
     }
 
-    public void selectView(int position, boolean value) {
+    private void selectView(int position, boolean value) {
         if (value) {
             selectedFriends.put(position, value);
         } else {
             selectedFriends.delete(position);
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public void selectAll() {
+        boolean isAllSelected = selectedFriends.size() == friends.size();
+        selectedFriends.clear();
+
+        if (!isAllSelected) {
+            int i = 0;
+            for (Friend friend : friends) {
+                selectedFriends.put(i, true);
+                i++;
+            }
         }
 
         notifyDataSetChanged();

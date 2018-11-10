@@ -8,7 +8,7 @@
     <string name="server_client_id">889136593059-sm0u52gckhufr2pv38iaoqogg3r6u390.apps.googleusercontent.com</string>
 
     <string name="title_activity_maps">Map</string>
-    <string name="sharingEndDate">End of sharing</string>
+    <string name="sharing_end_date">End of sharing</string>
     <string name="friend_requests">Friend requests</string>
     <string name="friends">Friends</string>
     <string name="action_share">Share</string>
@@ -16,4 +16,13 @@
     <string name="action_view_sharings">Sharings</string>
     <string name="accept_friend">Accept friend request</string>
     <string name="deny_friend">Deny friend request</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_select_all">All</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="sharing_dialog_title">Share</string>
+    <string name="calendar_permission_needed">Permission required to read calendar!</string>
+    <string name="no_friend_selected">Select a friend!</string>
+    <string name="end_of_sharing_error">Required</string>
+    <string name="attachImageDescription">Attach image</string>
+    <string name="post_textview_hint">Event description</string>
 </resources>

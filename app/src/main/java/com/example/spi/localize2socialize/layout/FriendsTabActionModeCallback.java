@@ -1,15 +1,13 @@
-package layout;
+package com.example.spi.localize2socialize.layout;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.spi.localize2socialize.MainActivity;
 import com.example.spi.localize2socialize.R;
-
-import layout.adapters.FriendsAdapter;
+import com.example.spi.localize2socialize.layout.adapters.FriendsAdapter;
 
 public class FriendsTabActionModeCallback implements ActionMode.Callback {
     private FriendsAdapter friendsAdapter;
@@ -35,7 +33,11 @@ public class FriendsTabActionModeCallback implements ActionMode.Callback {
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_share:
-                mode.finish();
+                checkPermission();
+                break;
+            case R.id.action_select_all:
+                friendsAdapter.selectAll();
+                updateActionModeTitle();
                 break;
         }
         return false;
@@ -44,5 +46,14 @@ public class FriendsTabActionModeCallback implements ActionMode.Callback {
     @Override
     public void onDestroyActionMode(ActionMode mode) {
         friendsAdapter.removeSelection();
+        ((FriendsTab) ((MainActivity) context).getFragment(1)).setActionModeNull();
+    }
+
+    private void checkPermission() {
+        ((FriendsTab) ((MainActivity) context).getFragment(1)).checkPermission();
+    }
+
+    private void updateActionModeTitle() {
+        ((FriendsTab) ((MainActivity) context).getFragment(1)).updateActionModeTitle(friendsAdapter);
     }
 }

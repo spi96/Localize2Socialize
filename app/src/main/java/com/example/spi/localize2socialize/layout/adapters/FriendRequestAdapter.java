@@ -1,4 +1,4 @@
-package layout.adapters;
+package com.example.spi.localize2socialize.layout.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,11 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.spi.localize2socialize.R;
+import com.example.spi.localize2socialize.models.Friend;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import models.Friend;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.FriendRequestViewHolder> {
 

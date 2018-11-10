@@ -1,11 +1,11 @@
-package viewmodels;
+package com.example.spi.localize2socialize.viewmodels;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
-import java.util.List;
+import com.example.spi.localize2socialize.models.Event;
 
-import models.Event;
+import java.util.List;
 
 public class EventsTabViewModel extends ViewModel {
     private MutableLiveData<List<Event>> events = new MutableLiveData<>();
