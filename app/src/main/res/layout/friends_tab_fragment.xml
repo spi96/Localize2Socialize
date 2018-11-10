@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
-    tools:context="layout.FriendsTab"
+    tools:context="com.example.spi.localize2socialize.MainActivity"
     android:weightSum="10">
 
     <LinearLayout
