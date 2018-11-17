@@ -62,4 +62,9 @@ public class Calendar {
     public void setEvents(List<Event> events) {
         this.events = events;
     }
+
+    @Override
+    public String toString() {
+        return displayName;
+    }
 }
