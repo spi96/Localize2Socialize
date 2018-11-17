@@ -48,10 +48,12 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
     @Override
     public void onBindViewHolder(FriendsViewHolder holder, int position) {
         holder.position = position;
-        holder.friendTextView.setText(friends.get(position).getUser().getPersonName());
+        holder.friendTextView.setText(friends.get(position).getAccount().getPersonName());
 
-        int color = selectedFriends.get(position) ? R.color.colorSelectedItem : R.color.colorCardView;
-        holder.cardView.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), color));
+        int colorBackground = selectedFriends.get(position) ? R.color.colorSelectedItem : R.color.colorBackgroundNotSelectedItem;
+        int colorText = selectedFriends.get(position) ? R.color.colorTextSelectedItem : R.color.colorFriendsText;
+        holder.cardView.setCardBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), colorBackground));
+        holder.friendTextView.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), colorText));
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.example.spi.localize2socialize;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -14,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.spi.localize2socialize.layout.EventsTab;
 import com.example.spi.localize2socialize.layout.FriendsTab;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
+    TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +55,29 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
 
-        TabLayout tabLayout = findViewById(R.id.tabs);
+        tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+                        EventsTab eventsTab = (EventsTab) getFragment(0);
+                        eventsTab.resetTab();
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         GoogleSignInAccount account = null;
         account = getIntent().getParcelableExtra("ACCOUNT");
@@ -64,6 +89,11 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     private void setUpFragments(SectionsPagerAdapter sectionsPagerAdapter) {
         sectionsPagerAdapter.addFragment(EventsTab.newInstance(), "Events");
         sectionsPagerAdapter.addFragment(FriendsTab.newInstance(), "Friends");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public Fragment getFragment(int position) {
@@ -153,5 +183,12 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         viewModel.signOut(this, mGoogleSignInClient);
+    }
+
+    private void hideKeyboard(View view) {
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }

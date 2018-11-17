@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/activity_horizontal_margin">
+    android:layout_height="wrap_content">
 
     <android.support.v7.widget.CardView
         android:id="@+id/friendItemCV"
@@ -12,8 +11,7 @@
         android:layout_height="match_parent"
         android:layout_margin="4dp"
         app:cardElevation="@dimen/cardview_default_elevation"
-        app:cardCornerRadius="4dp"
-        app:cardBackgroundColor="@color/colorCardView">
+        app:cardCornerRadius="4dp">
 
         <TextView
             android:id="@+id/friend_name"

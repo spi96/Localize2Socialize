@@ -1,21 +1,34 @@
 package com.example.spi.localize2socialize.models;
 
-public class User {
+import android.net.Uri;
+
+public class Account {
+    private Long Id;
     private String personName;
     private String personGivenName;
     private String personFamilyName;
     private String personEmail;
     private String personId;
+    private Uri photo;
 
-    public User() {
+    public Account() {
     }
 
-    public User(String personName, String personGivenName, String personFamilyName, String personEmail, String personId) {
+    public Account(String personName, String personGivenName, String personFamilyName, String personEmail, String personId, Uri photo) {
         this.personName = personName;
         this.personGivenName = personGivenName;
         this.personFamilyName = personFamilyName;
         this.personEmail = personEmail;
         this.personId = personId;
+        this.photo = photo;
+    }
+
+    public Long getId() {
+        return Id;
+    }
+
+    public void setId(Long id) {
+        Id = id;
     }
 
     public String getPersonName() {
@@ -35,7 +48,6 @@ public class User {
     }
 
     public String getPersonFamilyName() {
-
         return personFamilyName;
     }
 
@@ -57,5 +69,13 @@ public class User {
 
     public void setPersonId(String personId) {
         this.personId = personId;
+    }
+
+    public Uri getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Uri photo) {
+        this.photo = photo;
     }
 }

@@ -22,7 +22,9 @@
     <string name="sharing_dialog_title">Share</string>
     <string name="calendar_permission_needed">Permission required to read calendar!</string>
     <string name="no_friend_selected">Select a friend!</string>
-    <string name="end_of_sharing_error">Required</string>
+    <string name="end_of_sharing_empty">Required</string>
     <string name="attachImageDescription">Attach image</string>
     <string name="post_textview_hint">Event description</string>
+    <string name="gps_not_enabled">Your GPS seems to be disabled, do you want to enable it?</string>
+    <string name="end_of_sharing_expired">Date is passed!</string>
 </resources>

@@ -6,8 +6,8 @@ import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
 import com.example.spi.localize2socialize.R;
+import com.example.spi.localize2socialize.models.Account;
 import com.example.spi.localize2socialize.models.Friend;
-import com.example.spi.localize2socialize.models.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +40,10 @@ public class FriendsTabViewModel extends AndroidViewModel {
         return friendRequests.getValue();
     }
 
+    public MutableLiveData<List<Friend>> getFriendRequestLiveData() {
+        return friendRequests;
+    }
+
     private List<Friend> loadFriendRequests() {
         //TODO MOCK!!!
         List<String> friendRequests = new ArrayList<>(Arrays.asList(getApplication().getResources().getStringArray(R.array.friend_requests)));
@@ -55,8 +59,8 @@ public class FriendsTabViewModel extends AndroidViewModel {
     private Function<String, Friend> mockToFriendRequest = new Function<String, Friend>() {
         @Override
         public Friend apply(String s) {
-            User user = new User(s, s, s, s, s);
-            Friend friend = new Friend(user, true);
+            Account account = new Account(s, s, s, s, s, null);
+            Friend friend = new Friend(account, true);
             return friend;
         }
     };
@@ -65,8 +69,8 @@ public class FriendsTabViewModel extends AndroidViewModel {
     private Function<String, Friend> mockToFriend = new Function<String, Friend>() {
         @Override
         public Friend apply(String s) {
-            User user = new User(s, s, s, s, s);
-            Friend friend = new Friend(user, false);
+            Account account = new Account(s, s, s, s, s, null);
+            Friend friend = new Friend(account, false);
             return friend;
         }
     };

@@ -2,23 +2,23 @@ package com.example.spi.localize2socialize.models;
 
 public class Friend {
 
-    private User user;
+    private Account account;
     private boolean isPending;
 
     public Friend() {
     }
 
-    public Friend(User user, boolean isPending) {
-        this.user = user;
+    public Friend(Account account, boolean isPending) {
+        this.account = account;
         this.isPending = isPending;
     }
 
-    public User getUser() {
-        return user;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     public boolean isPending() {

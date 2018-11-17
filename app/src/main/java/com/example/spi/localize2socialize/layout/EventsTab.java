@@ -1,14 +1,23 @@
 package com.example.spi.localize2socialize.layout;
 
 import android.Manifest;
+import android.app.Activity;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,13 +45,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapLongClickListener,
-        GoogleMap.OnMapClickListener {
+        GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener, View.OnClickListener {
     static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    static final int LOCATION_SERVICE_ENABLE_ACTION = 2;
+    static final int READ_REQUEST_CODE = 3;
+
     private static final String TAG = "EventsTab";
     private static final String KEY_MYLASTLOCATION = "location";
 
     private EditText postEditText;
     private LinearLayout linearLayout;
+    private CardView postCardView;
     private ImageButton attachImageButton;
 
     private EventsTabViewModel mViewModel;
@@ -51,8 +64,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     private GeoDataClient geoDataClient;
     private PlaceDetectionClient placeDetectionClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private Marker postMarker;
-    private Location mLastKnownLocation;
+
 
     public static EventsTab newInstance() {
         return new EventsTab();
@@ -63,12 +75,17 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
-            mLastKnownLocation = (Location) savedInstanceState.getParcelable(KEY_MYLASTLOCATION);
+            mViewModel.setmLastKnownLocation((Location) savedInstanceState.getParcelable(KEY_MYLASTLOCATION));
         }
 
         geoDataClient = Places.getGeoDataClient(getContext());
         placeDetectionClient = Places.getPlaceDetectionClient(getContext());
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -78,6 +95,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         postEditText = (EditText) view.findViewById(R.id.postEditText);
         attachImageButton = (ImageButton) view.findViewById(R.id.attachImage);
         linearLayout = (LinearLayout) view.findViewById(R.id.postLayout);
+        postCardView = (CardView) view.findViewById(R.id.postCardView);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -95,7 +113,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (mMap != null) {
-            outState.putParcelable(KEY_MYLASTLOCATION, mLastKnownLocation);
+            outState.putParcelable(KEY_MYLASTLOCATION, mViewModel.getmLastKnownLocation());
             super.onSaveInstanceState(outState);
         }
     }
@@ -122,19 +140,50 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         googleMap.setOnMapLongClickListener(this);
         googleMap.setOnMarkerClickListener(this);
         googleMap.setOnMapClickListener(this);
+        googleMap.setOnMyLocationButtonClickListener(this);
+        googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                Marker postMarker = mViewModel.getPostMarker();
+                if (postMarker != null) {
+                    postMarker.setPosition(marker.getPosition());
+                }
+            }
+        });
+
+        attachImageButton.setOnClickListener(this);
     }
 
     @Override
     public void onMapLongClick(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                .draggable(true);
 
-        if (postMarker != null) {
-            postMarker.remove();
+        if (mViewModel.getPostMarker() != null) {
+            mViewModel.getPostMarker().remove();
         }
-        postMarker = mMap.addMarker(markerOptions);
-        linearLayout.setVisibility(View.VISIBLE);
+        mViewModel.setPostMarker(mMap.addMarker(markerOptions));
+
+        postCardView.setVisibility(View.VISIBLE);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                int paddingTop = ((ViewGroup.MarginLayoutParams) postCardView.getLayoutParams()).topMargin + postCardView.getHeight();
+                mMap.setPadding(0, paddingTop, 0, 0);
+            }
+        });
     }
 
     @Override
@@ -144,18 +193,13 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     @Override
     public void onMapClick(LatLng latLng) {
-        if (postMarker != null) {
-            postMarker.remove();
-            postMarker = null;
-            linearLayout.setVisibility(View.GONE);
-        }
+        resetTab();
     }
 
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(getContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            updateUI();
             getCurrentLocation();
         } else {
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
@@ -169,7 +213,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    updateUI();
+
                     getCurrentLocation();
                 }
         }
@@ -177,8 +221,10 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     private void updateUI() {
         try {
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.setMyLocationEnabled(true);
+            if (mMap != null) {
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                mMap.setMyLocationEnabled(true);
+            }
         } catch (SecurityException e) {
             Log.e("EventsTab exception: %s", e.getMessage());
         }
@@ -191,18 +237,120 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
                     if (task.isSuccessful()) {
-                        mLastKnownLocation = task.getResult();
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(mLastKnownLocation.getLatitude(),
-                                        mLastKnownLocation.getLongitude()), 15));
+                        try {
+                            mViewModel.setmLastKnownLocation(task.getResult());
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(mViewModel.getmLastKnownLocation().getLatitude(),
+                                            mViewModel.getmLastKnownLocation().getLongitude()), 15));
+                            updateUI();
+                        } catch (NullPointerException e) {
+                            Log.e("EventsTab exception: %s", e.getMessage());
+                            statusCheck(true);
+                            updateUI();
+                        }
                     }
                 }
             });
 
         } catch (SecurityException e) {
             Log.e("EventsTab exception: %s", e.getMessage());
-        } catch (NullPointerException e) {
-            Log.e("EventsTab exception: %s", e.getMessage());
+        }
+    }
+
+    public void statusCheck(boolean showAlertDialog) {
+        final LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            if (showAlertDialog) {
+                buildAlertMessageNoGps();
+            }
+        }
+    }
+
+    private void buildAlertMessageNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage(R.string.gps_not_enabled)
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), LOCATION_SERVICE_ENABLE_ACTION);
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case LOCATION_SERVICE_ENABLE_ACTION:
+                getCurrentLocation();
+                break;
+            case READ_REQUEST_CODE:
+                if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+                    imageSearchResultProcess(data);
+                }
+                break;
+        }
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        getLocationPermission();
+        return true;
+    }
+
+    public void resetTab() {
+        if (postCardView.getVisibility() == View.VISIBLE || mViewModel.getPostMarker() != null) {
+            if (mViewModel.getPostMarker() != null) {
+                mViewModel.getPostMarker().remove();
+                mViewModel.setPostMarker(null);
+            }
+
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mMap.setPadding(0, 0, 0, 0);
+                }
+            });
+
+            postCardView.setVisibility(View.GONE);
+        }
+    }
+
+    public void performFileSearch() {
+        Intent intent = new Intent(/*Intent.ACTION_OPEN_DOCUMENT*/);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        //intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+
+        //startActivityForResult(intent, READ_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), READ_REQUEST_CODE);
+    }
+
+    private void imageSearchResultProcess(Intent resultData) {
+        Uri uri = null;
+        if (resultData != null) {
+            uri = resultData.getData();
+            //TODO image save
+        }
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.attachImage:
+                performFileSearch();
+                break;
         }
     }
 }

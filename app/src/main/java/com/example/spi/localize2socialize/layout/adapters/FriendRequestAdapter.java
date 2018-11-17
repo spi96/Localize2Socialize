@@ -51,7 +51,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     @Override
     public void onBindViewHolder(FriendRequestViewHolder holder, int position) {
         holder.position = position;
-        holder.friendTextView.setText(requests.get(position).getUser().getPersonName());
+        holder.friendTextView.setText(requests.get(position).getAccount().getPersonName());
     }
 
     @Override

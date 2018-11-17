@@ -1,6 +1,7 @@
 package com.example.spi.localize2socialize.layout;
 
 import android.Manifest;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,7 +25,10 @@ import com.example.spi.localize2socialize.RecyclerClickListener;
 import com.example.spi.localize2socialize.RecyclerTouchListener;
 import com.example.spi.localize2socialize.layout.adapters.FriendRequestAdapter;
 import com.example.spi.localize2socialize.layout.adapters.FriendsAdapter;
+import com.example.spi.localize2socialize.models.Friend;
 import com.example.spi.localize2socialize.viewmodels.FriendsTabViewModel;
+
+import java.util.List;
 
 public class FriendsTab extends Fragment {
     static final int REQUEST_READ_CALENDAR = 1;
@@ -46,7 +50,7 @@ public class FriendsTab extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.friends_tab_fragment, container, false);
+        final View view = inflater.inflate(R.layout.friends_tab_fragment, container, false);
 
         requestRecyclerView = (RecyclerView) view.findViewById(R.id.friendRequests);
         friendsRecyclerView = (RecyclerView) view.findViewById(R.id.friends);
@@ -55,6 +59,16 @@ public class FriendsTab extends Fragment {
         friendsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         mViewModel = ViewModelProviders.of(this).get(FriendsTabViewModel.class);
+
+        final Observer friendRequestObserver = new Observer<List<Friend>>() {
+            @Override
+            public void onChanged(@Nullable List<Friend> friends) {
+                int visibility = friends.size() > 0 ? View.VISIBLE : View.GONE;
+                view.findViewById(R.id.friendRequestCV).setVisibility(visibility);
+            }
+        };
+
+        mViewModel.getFriendRequestLiveData().observe(this, friendRequestObserver);
 
         FriendRequestAdapter friendRequestAdapter = new FriendRequestAdapter(mViewModel.getFriendRequests());
         FriendsAdapter friendsAdapter = new FriendsAdapter(mViewModel.getFriendsList());
@@ -90,9 +104,7 @@ public class FriendsTab extends Fragment {
 
         if (hasSelectedItems && actionMode == null) {
             actionMode = ((MainActivity) getActivity()).startSupportActionMode(new FriendsTabActionModeCallback(friendsAdapter, getContext()));
-        } /*else if (!hasSelectedItems && actionMode != null) {
-            actionMode.finish();
-        }*/
+        }
 
         if (actionMode != null) {
             updateActionModeTitle(friendsAdapter);
