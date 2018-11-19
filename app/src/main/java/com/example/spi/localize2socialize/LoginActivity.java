@@ -1,5 +1,6 @@
 package com.example.spi.localize2socialize;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestIdToken(getResources().getString(R.string.server_client_id))
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -73,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SING_IN) {       // TODO resultCode-ra else if?
+        if (resultCode == Activity.RESULT_OK && requestCode == RC_SING_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignedInResult(task);
         }
@@ -94,6 +96,7 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra("ACCOUNT", account);
 
         startActivity(intent);
+        finish();
     }
 }
 

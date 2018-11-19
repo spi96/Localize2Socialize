@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="friend_requests">
-        <!--<item>Kothencz Csaba</item>
+        <item>Kothencz Csaba</item>
         <item>Gyéresi Csaba</item>
         <item>Farkas Vivien</item>
         <item>Fazekas Tamás</item>
@@ -10,6 +10,6 @@
         <item>Beke Tamás</item>
         <item>Ádám Tibor</item>
         <item>Apor Dénes</item>
-        <item>Szabó Ákos</item>-->
+        <item>Szabó Ákos</item>
     </string-array>
 </resources>

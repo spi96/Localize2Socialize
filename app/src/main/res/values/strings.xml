@@ -27,4 +27,7 @@
     <string name="post_textview_hint">Event description</string>
     <string name="gps_not_enabled">Your GPS seems to be disabled, do you want to enable it?</string>
     <string name="end_of_sharing_expired">Date is passed!</string>
+    <string name="no_calendars_error">No calendars found!</string>
+    <string name="search_friends">Search friends</string>
+    <string name="action_send_request">Send request</string>
 </resources>

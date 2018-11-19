@@ -13,11 +13,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.example.spi.localize2socialize.MainActivity;
 import com.example.spi.localize2socialize.R;
@@ -30,16 +32,21 @@ import com.example.spi.localize2socialize.viewmodels.FriendsTabViewModel;
 
 import java.util.List;
 
-public class FriendsTab extends Fragment {
+public class FriendsTab extends Fragment implements View.OnClickListener {
     static final int REQUEST_READ_CALENDAR = 1;
     static final int REQUEST_SHOW_SHARING_DIALOG = 2;
-    private static final String DIALOG_TAG = "SHARING_DIALOG";
+    static final int REQUEST_SEARCH_FRIENDS_DIALOG = 3;
+
+    private static final String SHARING_DIALOG_TAG = "SHARING_DIALOG";
+    private static final String SEARCHING_DIALOG_TAG = "SEARCHING_DIALOG";
 
     private FriendsTabViewModel mViewModel;
 
     private RecyclerView requestRecyclerView;
     private RecyclerView friendsRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
+    CardView friendRequestCardView;
+    CardView friendsCardView;
 
     private ActionMode actionMode;
 
@@ -48,7 +55,7 @@ public class FriendsTab extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.friends_tab_fragment, container, false);
 
@@ -58,17 +65,42 @@ public class FriendsTab extends Fragment {
         requestRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         friendsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        friendRequestCardView = view.findViewById(R.id.friendRequestCV);
+        friendsCardView = view.findViewById(R.id.friendsCV);
+
         mViewModel = ViewModelProviders.of(this).get(FriendsTabViewModel.class);
 
         final Observer friendRequestObserver = new Observer<List<Friend>>() {
             @Override
+            public void onChanged(@Nullable List<Friend> friendRequests) {
+                int requestVisibility = friendRequests.size() > 0 ? View.VISIBLE : View.GONE;
+                float friendsWeight = friendRequests.size() > 0 ? 7f : 10f;
+
+                float density = getContext().getResources().getDisplayMetrics().density;
+                int marginHorizontalDP = (int) (8 * density);
+                int marginBottomDP = (int) (16 * density);
+                int marginTopDP = friendRequests.size() > 0 ? marginHorizontalDP : marginBottomDP;
+
+                LinearLayout.LayoutParams layoutParams =
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, friendsWeight);
+                layoutParams.setMargins(marginHorizontalDP, marginTopDP, marginHorizontalDP, marginBottomDP);
+
+                friendRequestCardView.setVisibility(requestVisibility);
+                friendsCardView.setLayoutParams(layoutParams);
+            }
+        };
+
+        final Observer friendsObserver = new Observer<List<Friend>>() {
+
+            @Override
             public void onChanged(@Nullable List<Friend> friends) {
-                int visibility = friends.size() > 0 ? View.VISIBLE : View.GONE;
-                view.findViewById(R.id.friendRequestCV).setVisibility(visibility);
+                int friendsVisibility = friends.size() > 0 ? View.VISIBLE : View.INVISIBLE;
+                friendsCardView.setVisibility(friendsVisibility);
             }
         };
 
         mViewModel.getFriendRequestLiveData().observe(this, friendRequestObserver);
+        mViewModel.getFriendsLiveData().observe(this, friendsObserver);
 
         FriendRequestAdapter friendRequestAdapter = new FriendRequestAdapter(mViewModel.getFriendRequests());
         FriendsAdapter friendsAdapter = new FriendsAdapter(mViewModel.getFriendsList());
@@ -160,9 +192,16 @@ public class FriendsTab extends Fragment {
 
     public void showSharingDialog() {
         FragmentManager fragmentManager = (getActivity()).getSupportFragmentManager();
-        ShareDialog shareDialog = ShareDialog.newInstance();
+        ShareDialog shareDialog = ShareDialog.newInstance(mViewModel.getAccount().getPersonEmail());
         shareDialog.setTargetFragment(this, REQUEST_SHOW_SHARING_DIALOG);
-        shareDialog.show(fragmentManager, DIALOG_TAG);
+        shareDialog.show(fragmentManager, SHARING_DIALOG_TAG);
+    }
+
+    public void showSearchFriendsDialog() {
+        FragmentManager fragmentManager = (getActivity()).getSupportFragmentManager();
+        SearchDialog searchFriendsDialog = SearchDialog.newInstance(mViewModel.getAccount().getPersonId());
+        searchFriendsDialog.setTargetFragment(this, REQUEST_SHOW_SHARING_DIALOG);
+        searchFriendsDialog.show(fragmentManager, SEARCHING_DIALOG_TAG);
     }
 
     @Override
@@ -176,6 +215,14 @@ public class FriendsTab extends Fragment {
                 } else {
                     Snackbar.make(getActivity().findViewById(R.id.main_content), R.string.calendar_permission_needed, Snackbar.LENGTH_LONG).show();
                 }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab:
+                showSearchFriendsDialog();
         }
     }
 }

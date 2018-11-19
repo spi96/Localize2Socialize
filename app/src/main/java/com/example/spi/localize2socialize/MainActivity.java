@@ -3,7 +3,9 @@ package com.example.spi.localize2socialize;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -26,6 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,17 +41,36 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
     TabLayout tabLayout;
+    FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        GoogleSignInAccount account = null;
+        account = getIntent().getParcelableExtra("ACCOUNT");
+
+        final Global global = (Global) getApplication();
+
+        Bitmap photo = null;  //TODO Glide.with(this).load(account.getPhotoUrl()).into(PhotoImageview);
+        try {
+            if (account.getPhotoUrl() != null)
+                photo = MediaStore.Images.Media.getBitmap(getContentResolver(), account.getPhotoUrl()); //TODO
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        viewModel.setUser(account, photo);
+        global.setUser(viewModel.getUser());
+
         setContentView(R.layout.activity_main);
 
+        floatingActionButton = findViewById(R.id.fab);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
         setUpFragments(mSectionsPagerAdapter);
 
         mViewPager = findViewById(R.id.container);
@@ -60,7 +82,11 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                /*switch(tab.getPosition()){ /////TODO delete
+                    case 1:
+                        floatingActionButton.setOnClickListener();
 
+                }*/
             }
 
             @Override
@@ -79,11 +105,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             }
         });
 
-        GoogleSignInAccount account = null;
-        account = getIntent().getParcelableExtra("ACCOUNT");
 
-        viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
-        viewModel.setUser(account);
     }
 
     private void setUpFragments(SectionsPagerAdapter sectionsPagerAdapter) {
@@ -114,34 +136,35 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_sign_out) {
             signOut();
         }
-
         return false;
     }
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
     }
 
     @Override
     public void onPageSelected(int position) {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FriendsTab friendsTab = ((FriendsTab) mSectionsPagerAdapter.getItem(1));
+        EventsTab eventsTab = ((EventsTab) mSectionsPagerAdapter.getItem(0));
+
         switch (position) {
             case 0:
+                friendsTab.finishActionMode();
                 fab.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_map_settings));
-                ((FriendsTab) mSectionsPagerAdapter.getItem(1)).finishActionMode();
+                fab.setOnClickListener(eventsTab); //TODO kezelni a tabon
                 break;
             case 1:
                 fab.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_add_friend));
+                fab.setOnClickListener(friendsTab);
                 break;
         }
     }
@@ -181,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 .build();
 
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
         viewModel.signOut(this, mGoogleSignInClient);
     }
 

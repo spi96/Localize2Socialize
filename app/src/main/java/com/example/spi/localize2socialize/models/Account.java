@@ -9,12 +9,14 @@ public class Account {
     private String personFamilyName;
     private String personEmail;
     private String personId;
-    private Uri photo;
+    private transient Uri photo;
+    private String encodedPhoto;
 
     public Account() {
     }
 
-    public Account(String personName, String personGivenName, String personFamilyName, String personEmail, String personId, Uri photo) {
+    public Account(String personName, String personGivenName, String personFamilyName,
+                   String personEmail, String personId, Uri photo) {
         this.personName = personName;
         this.personGivenName = personGivenName;
         this.personFamilyName = personFamilyName;
@@ -77,5 +79,18 @@ public class Account {
 
     public void setPhoto(Uri photo) {
         this.photo = photo;
+    }
+
+    public String getEncodedPhoto() {
+        return encodedPhoto;
+    }
+
+    public void setEncodedPhoto(String encodedPhoto) {
+        this.encodedPhoto = encodedPhoto;
+    }
+
+    @Override
+    public String toString() {
+        return personName + "(" + personEmail.split("@")[0] + ")";
     }
 }

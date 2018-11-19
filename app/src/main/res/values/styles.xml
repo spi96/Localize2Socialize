@@ -19,4 +19,36 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="FriendsTabCardViewStyle" parent="CardView">
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardCornerRadius">4dp</item>
+    </style>
+
+    <style name="FriendsCardViewStyle" parent="FriendsTabCardViewStyle">
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="android:layout_weight">7</item>
+    </style>
+
+    <style name="FriendRequestsCardViewStyle" parent="FriendsTabCardViewStyle">
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_weight">3</item>
+    </style>
+
+    <style name="DialogTitleStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textScaleX">1.2</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Large</item>
+        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/colorSharingDialogText</item>
+    </style>
+
+
 </resources>

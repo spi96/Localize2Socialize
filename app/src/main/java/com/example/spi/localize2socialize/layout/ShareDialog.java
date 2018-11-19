@@ -15,11 +15,13 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.models.Calendar;
@@ -29,9 +31,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 
-public class ShareDialog extends DialogFragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class ShareDialog extends DialogFragment implements View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor>,
+        AdapterView.OnItemSelectedListener {
     private static final int CALENDAR_LOADER_ID = 1;
     private static final int EVENT_LOADER_ID = 2;
     private final String DATE_FORMAT = "yyyy-MM-dd";
@@ -40,9 +42,9 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
     private DatePickerDialog.OnDateSetListener dateListener;
     private SimpleDateFormat simpleDateFormat;
 
-    //private List<Calendar> calendars;
     private ArrayAdapter<Calendar> calendars;
     private List<Event> events;
+    private static String account;
 
     //private Spinner sharingTypeSpinner;
     private Spinner calendarSpinner;
@@ -51,11 +53,52 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
     private Button shareButton;
     private Button cancelButton;
 
+    public static final String[] CALENDAR_PROJECTION = new String[]{
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.OWNER_ACCOUNT
+    };
+
+    private static final int PROJECTION_ID_INDEX = 0;
+    private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
+    private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
+    private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;
+
+    public static final String[] EVENT_PROJECTION = new String[]{
+            CalendarContract.Events.CALENDAR_ID,
+            CalendarContract.Events.TITLE,
+            CalendarContract.Events.DESCRIPTION,
+            CalendarContract.Events.EVENT_LOCATION,
+            CalendarContract.Events.DTSTART,
+            CalendarContract.Events.DTEND,
+            CalendarContract.Events.EVENT_TIMEZONE,
+            CalendarContract.Events.EVENT_END_TIMEZONE,
+            CalendarContract.Events.ALL_DAY,
+            CalendarContract.Events._ID,
+            CalendarContract.Events.RRULE,
+            CalendarContract.Events.RDATE
+    };
+
+    private static final int PROJECTION_CALENDAR_ID_INDEX = 0;
+    private static final int PROJECTION_TITLE_INDEX = 1;
+    private static final int PROJECTION_DESCRIPTION_INDEX = 2;
+    private static final int PROJECTION_EVENT_LOCATION_INDEX = 3;
+    private static final int PROJECTION_DTSTART_INDEX = 4;
+    private static final int PROJECTION_DTEND_INDEX = 5;
+    private static final int PROJECTION_EVENT_TIMEZONE_INDEX = 6;
+    private static final int PROJECTION_EVENT_END_TIMEZONE_INDEX = 7;
+    private static final int PROJECTION_ALL_DAY_INDEX = 8;
+    private static final int PROJECTION_EVENT_ID_INDEX = 9;
+    private static final int PROJECTION_RRULE_INDEX = 10;
+    private static final int PROJECTION_RDATE_INDEX = 11;
+
     public ShareDialog() {
     }
 
-    public static ShareDialog newInstance() {
+    public static ShareDialog newInstance(String _account) {
         ShareDialog fragment = new ShareDialog();
+        account = _account;
         return fragment;
     }
 
@@ -65,7 +108,6 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         calendars = new ArrayAdapter<Calendar>(getContext(), android.R.layout.simple_spinner_item);
         calendars.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         events = new ArrayList<>();
-        //calendars = new ArrayList<>();
         simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, getActivity().getResources().getConfiguration().getLocales().get(0));
 
         dateListener = new DatePickerDialog.OnDateSetListener() {
@@ -101,6 +143,7 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         cancelButton.setOnClickListener(this);
         shareButton.setOnClickListener(this);
         endOfSharingET.setOnClickListener(this);
+        calendarSpinner.setOnItemSelectedListener(this);
     }
 
     private void onShareButtonClick() {
@@ -160,47 +203,6 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         }
     }
 
-    public static final String[] CALENDAR_PROJECTION = new String[]{
-            CalendarContract.Calendars._ID,
-            CalendarContract.Calendars.ACCOUNT_NAME,
-            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
-            CalendarContract.Calendars.OWNER_ACCOUNT
-    };
-
-    private static final int PROJECTION_ID_INDEX = 0;
-    private static final int PROJECTION_ACCOUNT_NAME_INDEX = 1;
-    private static final int PROJECTION_DISPLAY_NAME_INDEX = 2;
-    private static final int PROJECTION_OWNER_ACCOUNT_INDEX = 3;
-
-    public static final String[] EVENT_PROJECTION = new String[]{
-            CalendarContract.Events.CALENDAR_ID,
-            CalendarContract.Events.TITLE,
-            CalendarContract.Events.DESCRIPTION,
-            CalendarContract.Events.EVENT_LOCATION,
-            CalendarContract.Events.DTSTART,
-            CalendarContract.Events.DTEND,
-            CalendarContract.Events.EVENT_TIMEZONE,
-            CalendarContract.Events.EVENT_END_TIMEZONE,
-            CalendarContract.Events.ALL_DAY,
-            CalendarContract.Events._ID,
-            CalendarContract.Events.RRULE,
-            CalendarContract.Events.RDATE
-    };
-
-    private static final int PROJECTION_CALENDAR_ID_INDEX = 0;
-    private static final int PROJECTION_TITLE_INDEX = 1;
-    private static final int PROJECTION_DESCRIPTION_INDEX = 2;
-    private static final int PROJECTION_EVENT_LOCATION_INDEX = 3;
-    private static final int PROJECTION_DTSTART_INDEX = 4;
-    private static final int PROJECTION_DTEND_INDEX = 5;
-    private static final int PROJECTION_EVENT_TIMEZONE_INDEX = 6;
-    private static final int PROJECTION_EVENT_END_TIMEZONE_INDEX = 7;
-    private static final int PROJECTION_ALL_DAY_INDEX = 8;
-    private static final int PROJECTION_EVENT_ID_INDEX = 9;
-    private static final int PROJECTION_RRULE_INDEX = 10;
-    private static final int PROJECTION_RDATE_INDEX = 11;
-
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri baseUri;
@@ -208,18 +210,17 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         switch (id) {
             case CALENDAR_LOADER_ID:
                 baseUri = CalendarContract.Calendars.CONTENT_URI;
-
-                /*String select = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
-                        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
-                        + Calendars.OWNER_ACCOUNT + " = ?))";*/
-
+                String select = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?))";
+                String[] selectArgs = new String[]{account};
                 return new CursorLoader(getContext(), baseUri,
-                        CALENDAR_PROJECTION, null, null, null);
+                        CALENDAR_PROJECTION, select, selectArgs,
+                        CalendarContract.Calendars.CALENDAR_DISPLAY_NAME + " ASC");
 
             case EVENT_LOADER_ID:
                 baseUri = CalendarContract.Events.CONTENT_URI;
-                String selection = "((" + CalendarContract.Events.CALENDAR_ID + " = ?))";
-                String[] selectionArgs = new String[]{String.valueOf(((Calendar) calendarSpinner.getSelectedItem()).getId())};
+                String selection = "((" + CalendarContract.Events.CALENDAR_ID + " = ?) AND (" +
+                        CalendarContract.Events.EVENT_LOCATION + " != ?))";
+                String[] selectionArgs = new String[]{String.valueOf(((Calendar) calendarSpinner.getSelectedItem()).getId()), ""};
                 return new CursorLoader(getContext(), baseUri, EVENT_PROJECTION, selection, selectionArgs, null);
 
             default:
@@ -254,40 +255,32 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
 
             calendars.add(new Calendar(calID, accountName, displayName, ownerName));
         }
-        //arrayAdapter.addAll(calendars.stream().map(calendarDisplayNameProjection).collect(Collectors.<String>toList()));
+        if (calendars.getCount() == 0) {
+            shareButton.setEnabled(false);
+            calendars.add(new Calendar(-1, null,
+                    getContext().getResources().getString(R.string.no_calendars_error), null));
+        }
     }
 
     private void readEventResult(Cursor data) {
         data.moveToFirst();
         while (data.moveToNext()) {
-            long calID = 0;
-            long eventID = 0;
-            String title = null;
-            String description = null;
-            String eventLocation = null;
-            Date dtStart = null;
-            Date dtEnd = null;
-            String eventTimeZone = null;
-            String eventEndTimeZone = null;
-            boolean allDay = false;
-            String rRule = null;
-            String rDate = null;
+            long calID = data.getLong(PROJECTION_CALENDAR_ID_INDEX);
+            long eventID = data.getLong(PROJECTION_EVENT_ID_INDEX);
+            String title = data.getString(PROJECTION_TITLE_INDEX);
+            String description = data.getString(PROJECTION_DESCRIPTION_INDEX);
+            String eventLocation = data.getString(PROJECTION_EVENT_LOCATION_INDEX);
+            Date dtStart = new Date(data.getLong(PROJECTION_DTSTART_INDEX));
+            Date dtEnd = new Date(data.getLong(PROJECTION_DTEND_INDEX));
+            String eventTimeZone = data.getString(PROJECTION_EVENT_TIMEZONE_INDEX);
+            String eventEndTimeZone = data.getString(PROJECTION_EVENT_END_TIMEZONE_INDEX);
+            boolean allDay = data.getInt(PROJECTION_ALL_DAY_INDEX) == 0 ? false : true;
+            String rRule = data.getString(PROJECTION_RRULE_INDEX);
+            String rDate = data.getString(PROJECTION_RDATE_INDEX);
 
-            calID = data.getLong(PROJECTION_CALENDAR_ID_INDEX);
-            eventID = data.getLong(PROJECTION_EVENT_ID_INDEX);
-            title = data.getString(PROJECTION_TITLE_INDEX);
-            description = data.getString(PROJECTION_DESCRIPTION_INDEX);
-            eventLocation = data.getString(PROJECTION_EVENT_LOCATION_INDEX);
-            dtStart = new Date(data.getLong(PROJECTION_DTSTART_INDEX));
-            dtEnd = new Date(data.getLong(PROJECTION_DTEND_INDEX));
-            eventTimeZone = data.getString(PROJECTION_EVENT_TIMEZONE_INDEX);
-            eventEndTimeZone = data.getString(PROJECTION_EVENT_END_TIMEZONE_INDEX);
-            allDay = data.getInt(PROJECTION_ALL_DAY_INDEX) == 0 ? false : true;
-            rRule = data.getString(PROJECTION_RRULE_INDEX);
-            rDate = data.getString(PROJECTION_RDATE_INDEX);
-
-            //TODO mapping
-            //events.add();
+            Event event = new Event(calID, eventID, title, description, eventLocation, dtStart, dtEnd,
+                    eventTimeZone, eventEndTimeZone, allDay, rRule, rDate);
+            events.add(event);
         }
 
     }
@@ -297,15 +290,30 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
 
     }
 
-    Function<Calendar, String> calendarDisplayNameProjection = new Function<Calendar, String>() {
-        @Override
-        public String apply(Calendar s) {
-            return s.getDisplayName();
-        }
-    };
-
     private void updateView() {
         endOfSharingET.setText(simpleDateFormat.format(calendar.getTime()));
         textInputLayout.setError(null);
+    }
+
+    private void setSpinnerError() {
+        View selectedView = calendarSpinner.getSelectedView();
+        if (selectedView != null && selectedView instanceof TextView) {
+            calendarSpinner.requestFocus();
+            TextView selectedTextView = (TextView) selectedView;
+            selectedTextView.setError(getContext().getResources().getString(R.string.no_calendars_error));
+            calendarSpinner.performClick();
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (calendars.getItem(position).getId() == -1) {
+            setSpinnerError();
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

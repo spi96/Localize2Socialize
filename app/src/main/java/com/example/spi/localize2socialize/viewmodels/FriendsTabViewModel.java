@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
+import com.example.spi.localize2socialize.Global;
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.models.Account;
 import com.example.spi.localize2socialize.models.Friend;
@@ -16,12 +17,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class FriendsTabViewModel extends AndroidViewModel {
+    private Account account;
     private MutableLiveData<List<Friend>> friends = new MutableLiveData<>();
-
     private MutableLiveData<List<Friend>> friendRequests = new MutableLiveData<>();
 
     public FriendsTabViewModel(@NonNull Application application) {
         super(application);
+        account = ((Global) application).getUser();
         friends.setValue(loadFriends());
         friendRequests.setValue(loadFriendRequests());
     }
@@ -40,8 +42,16 @@ public class FriendsTabViewModel extends AndroidViewModel {
         return friendRequests.getValue();
     }
 
+    public MutableLiveData<List<Friend>> getFriendsLiveData() {
+        return friends;
+    }
+
     public MutableLiveData<List<Friend>> getFriendRequestLiveData() {
         return friendRequests;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 
     private List<Friend> loadFriendRequests() {
@@ -51,6 +61,7 @@ public class FriendsTabViewModel extends AndroidViewModel {
     }
 
     private List<Friend> loadFriends() {
+        //TODO MOCK
         List<String> friends = new ArrayList<>(Arrays.asList(getApplication().getResources().getStringArray(R.array.friends)));
         return friends.stream().map(mockToFriend).collect(Collectors.<Friend>toList());
     }
