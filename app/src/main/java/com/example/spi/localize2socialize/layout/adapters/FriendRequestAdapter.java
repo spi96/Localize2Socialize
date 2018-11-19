@@ -9,13 +9,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.spi.localize2socialize.R;
-import com.example.spi.localize2socialize.models.Friend;
+import com.example.spi.localize2socialize.models.Account;
 
 import java.util.List;
 
 public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdapter.FriendRequestViewHolder> {
 
-    private final List<Friend> requests;
+    private final List<Account> requests;
 
     public static class FriendRequestViewHolder extends RecyclerView.ViewHolder {
         int position;
@@ -34,7 +34,7 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
         }
     }
 
-    public FriendRequestAdapter(List<Friend> friends) {
+    public FriendRequestAdapter(List<Account> friends) {
         this.requests = friends;
     }
 
@@ -51,11 +51,19 @@ public class FriendRequestAdapter extends RecyclerView.Adapter<FriendRequestAdap
     @Override
     public void onBindViewHolder(FriendRequestViewHolder holder, int position) {
         holder.position = position;
-        holder.friendTextView.setText(requests.get(position).getAccount().getPersonName());
+        Account account = requests.get(position);
+        holder.friendTextView.setText(new StringBuilder(account.getPersonFamilyName()).append(" ")
+                .append(account.getPersonGivenName()));
     }
 
     @Override
     public int getItemCount() {
         return requests.size();
+    }
+
+    public void updateAdapter(List<Account> requests) {
+        this.requests.clear();
+        this.requests.addAll(requests);
+        notifyDataSetChanged();
     }
 }

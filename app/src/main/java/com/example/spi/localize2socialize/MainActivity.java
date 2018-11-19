@@ -82,11 +82,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                /*switch(tab.getPosition()){ /////TODO delete
-                    case 1:
-                        floatingActionButton.setOnClickListener();
-
-                }*/
             }
 
             @Override
@@ -101,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
             }
         });
 

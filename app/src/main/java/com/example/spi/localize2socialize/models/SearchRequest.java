@@ -1,15 +1,15 @@
 package com.example.spi.localize2socialize.models;
 
-public class SearchRequest {
-    String filter;
-    String callerPersonId;
+public class SearchRequest extends Request {
+    private String filter;
+    private Account callerPerson;
 
     public SearchRequest() {
     }
 
-    public SearchRequest(String filter, String callerPersonId) {
+    public SearchRequest(String filter, Account callerPerson) {
         this.filter = filter;
-        this.callerPersonId = callerPersonId;
+        this.callerPerson = callerPerson;
     }
 
     public String getFilter() {
@@ -20,11 +20,13 @@ public class SearchRequest {
         this.filter = filter;
     }
 
-    public String getCallerPersonId() {
-        return callerPersonId;
+    public Account getCallerPerson() {
+        return callerPerson;
     }
 
-    public void setCallerPersonId(String callerPersonId) {
-        this.callerPersonId = callerPersonId;
+    public void setCallerPerson(Account callerPerson) {
+        this.callerPerson = callerPerson;
     }
 }
+
+

@@ -80,7 +80,7 @@ public class MainActivityViewModel extends AndroidViewModel {
         sendRequest(url, Request.Method.POST, jsonObject);
     }
 
-    public void sendRequest(String url, int method, JSONObject jsonRequest) {
+    private void sendRequest(String url, int method, JSONObject jsonRequest) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, url, jsonRequest,
                 getResponseListener(), getResponseErrorListener());
         RequestQueueSingleton.getInstance(getApplication()).addToRequestQueue(jsonObjectRequest);
@@ -96,7 +96,6 @@ public class MainActivityViewModel extends AndroidViewModel {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Log.i("HTTP RESPONSE", response.toString());
             }
         };
     }

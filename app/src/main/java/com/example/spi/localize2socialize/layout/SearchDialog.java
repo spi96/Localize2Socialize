@@ -20,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.models.Account;
+import com.example.spi.localize2socialize.models.FriendRequest;
 import com.example.spi.localize2socialize.models.SearchRequest;
 import com.example.spi.localize2socialize.net.RequestQueueSingleton;
 import com.google.gson.Gson;
@@ -34,8 +35,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class SearchDialog extends DialogFragment implements View.OnClickListener, TextWatcher, AdapterView.OnItemClickListener {
-    private static String personId;
-    private String selectedPersonId;
+    private static Account person;
+    private Account selectedPerson;
     private ArrayAdapter<Account> filteredAccounts;
 
     private AppCompatAutoCompleteTextView autoCompleteTextView;
@@ -45,9 +46,9 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
     public SearchDialog() {
     }
 
-    public static SearchDialog newInstance(String _personId) {
+    public static SearchDialog newInstance(Account _person) {
         SearchDialog searchDialog = new SearchDialog();
-        personId = _personId;
+        person = _person;
         return searchDialog;
     }
 
@@ -55,6 +56,7 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         filteredAccounts = new ArrayAdapter<Account>(getContext(), android.R.layout.simple_dropdown_item_1line);
+        filteredAccounts.setNotifyOnChange(true);
     }
 
     @Nullable
@@ -78,7 +80,7 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
                 dismiss();
                 break;
             case R.id.action_send_friend_request:
-                //TODO immplement
+                sendFriendRequest();
                 break;
         }
     }
@@ -96,8 +98,11 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (s.length() > 2) {
+        if (s.length() > 1) {
             searchAccounts(s);
+        }
+        if (autoCompleteTextView.getError() != null && autoCompleteTextView.getError().length() > 0) {
+            autoCompleteTextView.setError(null);
         }
     }
 
@@ -108,28 +113,28 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        selectedPersonId = filteredAccounts.getItem(position).getPersonId();
+        selectedPerson = filteredAccounts.getItem(position);
     }
 
     public void searchAccounts(CharSequence filter) {
         String url = getResources().
                 getString(R.string.baseUrl) + getResources().getString(R.string.searchAccounts);
+        SearchRequest request = new SearchRequest(filter.toString(), person);
         JSONObject jsonObject = null;
         try {
-            jsonObject = createRequest(filter);
+            jsonObject = createRequest(request);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         sendRequest(url, Request.Method.POST, jsonObject);
     }
 
-    private JSONObject createRequest(CharSequence filter) throws JSONException {
+    private JSONObject createRequest(com.example.spi.localize2socialize.models.Request request) throws JSONException {
         Gson gson = new GsonBuilder().create();
-        SearchRequest request = new SearchRequest(filter.toString(), personId);
         return new JSONObject(gson.toJson(request));
     }
 
-    public void sendRequest(String url, int method, JSONObject jsonRequest) {
+    private void sendRequest(String url, int method, JSONObject jsonRequest) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, url, jsonRequest,
                 getResponseListener(), getResponseErrorListener());
         RequestQueueSingleton.getInstance(getContext()).addToRequestQueue(jsonObjectRequest);
@@ -142,20 +147,12 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
                 filteredAccounts.clear();
                 if (response.has("accounts")) {
                     try {
-                        JSONArray result = response.getJSONArray("accounts");
-                        String json = result.toString();
-                        Gson gson = new Gson();
-                        Type type = new TypeToken<List<Account>>() {
-                        }.getType();
-                        List<Account> accountList = gson.fromJson(json, type);
+                        List<Account> accountList = convertResponseToList(response);
                         filteredAccounts.addAll(accountList);
-                        filteredAccounts.notifyDataSetChanged();
-                        //filteredAccounts.addAll(response.getJSONArray("accounts"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-                Log.i("HTTP RESPONSE", response.toString());
             }
         };
     }
@@ -167,5 +164,35 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
                 Log.e("API CALL ERROR", error.toString());
             }
         };
+    }
+
+    private List<Account> convertResponseToList(JSONObject response) throws JSONException {
+        JSONArray result = response.getJSONArray("accounts");
+        String json = result.toString();
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Account>>() {
+        }.getType();
+
+        return gson.fromJson(json, type);
+    }
+
+    private void sendFriendRequest() {
+        String url = getResources().
+                getString(R.string.baseUrl) + getResources().getString(R.string.sendRequest);
+
+        if (selectedPerson != null) {
+            FriendRequest friendRequest = new FriendRequest(person.getPersonId(), selectedPerson.getPersonId());
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = createRequest(friendRequest);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            sendRequest(url, Request.Method.POST, jsonObject);
+            dismiss();
+        } else {
+            autoCompleteTextView.requestFocus();
+            autoCompleteTextView.setError(getResources().getString(R.string.person_not_found));
+        }
     }
 }

@@ -27,7 +27,7 @@ import com.example.spi.localize2socialize.RecyclerClickListener;
 import com.example.spi.localize2socialize.RecyclerTouchListener;
 import com.example.spi.localize2socialize.layout.adapters.FriendRequestAdapter;
 import com.example.spi.localize2socialize.layout.adapters.FriendsAdapter;
-import com.example.spi.localize2socialize.models.Friend;
+import com.example.spi.localize2socialize.models.Account;
 import com.example.spi.localize2socialize.viewmodels.FriendsTabViewModel;
 
 import java.util.List;
@@ -70,9 +70,10 @@ public class FriendsTab extends Fragment implements View.OnClickListener {
 
         mViewModel = ViewModelProviders.of(this).get(FriendsTabViewModel.class);
 
-        final Observer friendRequestObserver = new Observer<List<Friend>>() {
+        final Observer friendRequestObserver = new Observer<List<Account>>() {
             @Override
-            public void onChanged(@Nullable List<Friend> friendRequests) {
+            public void onChanged(@Nullable List<Account> friendRequests) {
+                ((FriendRequestAdapter) requestRecyclerView.getAdapter()).updateAdapter(friendRequests);
                 int requestVisibility = friendRequests.size() > 0 ? View.VISIBLE : View.GONE;
                 float friendsWeight = friendRequests.size() > 0 ? 7f : 10f;
 
@@ -90,10 +91,11 @@ public class FriendsTab extends Fragment implements View.OnClickListener {
             }
         };
 
-        final Observer friendsObserver = new Observer<List<Friend>>() {
+        final Observer friendsObserver = new Observer<List<Account>>() {
 
             @Override
-            public void onChanged(@Nullable List<Friend> friends) {
+            public void onChanged(@Nullable List<Account> friends) {
+                ((FriendsAdapter) friendsRecyclerView.getAdapter()).updateAdapter(friends);
                 int friendsVisibility = friends.size() > 0 ? View.VISIBLE : View.INVISIBLE;
                 friendsCardView.setVisibility(friendsVisibility);
             }
@@ -199,7 +201,7 @@ public class FriendsTab extends Fragment implements View.OnClickListener {
 
     public void showSearchFriendsDialog() {
         FragmentManager fragmentManager = (getActivity()).getSupportFragmentManager();
-        SearchDialog searchFriendsDialog = SearchDialog.newInstance(mViewModel.getAccount().getPersonId());
+        SearchDialog searchFriendsDialog = SearchDialog.newInstance(mViewModel.getAccount());
         searchFriendsDialog.setTargetFragment(this, REQUEST_SHOW_SHARING_DIALOG);
         searchFriendsDialog.show(fragmentManager, SEARCHING_DIALOG_TAG);
     }

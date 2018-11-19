@@ -10,13 +10,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.spi.localize2socialize.R;
-import com.example.spi.localize2socialize.models.Friend;
+import com.example.spi.localize2socialize.models.Account;
 
 import java.util.List;
 
 public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsViewHolder> {
 
-    private List<Friend> friends;
+    private final List<Account> friends;
     private SparseBooleanArray selectedFriends;
 
     public static class FriendsViewHolder extends RecyclerView.ViewHolder {
@@ -32,7 +32,7 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
         }
     }
 
-    public FriendsAdapter(List<Friend> friends) {
+    public FriendsAdapter(List<Account> friends) {
         this.friends = friends;
         this.selectedFriends = new SparseBooleanArray();
     }
@@ -48,7 +48,9 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
     @Override
     public void onBindViewHolder(FriendsViewHolder holder, int position) {
         holder.position = position;
-        holder.friendTextView.setText(friends.get(position).getAccount().getPersonName());
+        Account account = friends.get(position);
+        holder.friendTextView.setText(new StringBuilder(account.getPersonFamilyName()).append(" ")
+                .append(account.getPersonGivenName()));
 
         int colorBackground = selectedFriends.get(position) ? R.color.colorSelectedItem : R.color.colorBackgroundNotSelectedItem;
         int colorText = selectedFriends.get(position) ? R.color.colorTextSelectedItem : R.color.colorFriendsText;
@@ -86,12 +88,18 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
 
         if (!isAllSelected) {
             int i = 0;
-            for (Friend friend : friends) {
+            for (Account friend : friends) {
                 selectedFriends.put(i, true);
                 i++;
             }
         }
 
+        notifyDataSetChanged();
+    }
+
+    public void updateAdapter(List<Account> friends) {
+        this.friends.clear();
+        this.friends.addAll(friends);
         notifyDataSetChanged();
     }
 

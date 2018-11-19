@@ -91,6 +91,8 @@ public class Account {
 
     @Override
     public String toString() {
-        return personName + "(" + personEmail.split("@")[0] + ")";
+        StringBuilder name = new StringBuilder(personFamilyName);
+        name.append(" ").append(personGivenName).append("(").append(personEmail.split("@")[0]).append(")");
+        return name.toString();
     }
 }
