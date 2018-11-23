@@ -6,16 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    tools:context="com.example.spi.localize2socialize.MainActivity">
+    android:background="@drawable/popup_window"
+    tools:context="com.example.spi.localize2socialize.view.MainActivity">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textScaleX="1.2"
-        android:textAlignment="center"
-        android:textAppearance="@android:style/TextAppearance.Large"
-        android:background="@color/colorPrimaryDark"
-        android:textColor="@color/colorSharingDialogText"
+        style="@style/DialogTitleStyle"
+        android:background="@drawable/dialog_title"
         android:text="@string/sharing_dialog_title" />
 
     <LinearLayout
@@ -24,11 +20,16 @@
         android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
         android:layout_marginVertical="@dimen/activity_vertical_margin"
         android:orientation="vertical">
-        <!--<Spinner
-            android:id="@+id/sharingTypeSpinner"
-            android:layout_width="match_parent"
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/activity_vertical_margin" />-->
+            android:indeterminateTint="@color/colorPrimaryDark"
+            android:indeterminate="true"
+            android:layout_gravity="center_horizontal"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:visibility="gone" />
 
         <Spinner
             android:id="@+id/calendarSpinner"
@@ -66,7 +67,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/action_cancel"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/popup_button"
+                style="?android:buttonBarButtonStyle"
+                android:padding="10dp"
                 android:textColor="@color/colorSharingDialogText"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin" />
 
@@ -74,7 +77,9 @@
                 android:id="@+id/action_share_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/popup_button"
+                style="?android:buttonBarButtonStyle"
+                android:padding="10dp"
                 android:textColor="@color/colorSharingDialogText"
                 android:text="@string/action_share" />
         </LinearLayout>

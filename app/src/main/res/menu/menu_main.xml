@@ -1,7 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.spi.localize2socialize.MainActivity">
+    tools:context="com.example.spi.localize2socialize.view.MainActivity">
+    <item
+        android:id="@+id/menu_refresh"
+        app:showAsAction="ifRoom"
+        android:title="@string/menu_refresh"
+        android:icon="@drawable/ic_refresh_icon" />
+
     <item
         android:id="@+id/action_view_profile"
         android:orderInCategory="1"

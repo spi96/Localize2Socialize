@@ -4,10 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.spi.localize2socialize.MainActivity">
+    android:background="@drawable/popup_window"
+    tools:context="com.example.spi.localize2socialize.view.MainActivity">
 
     <TextView
         style="@style/DialogTitleStyle"
+        android:background="@drawable/dialog_title"
         android:text="@string/search_friends" />
 
     <LinearLayout
@@ -37,7 +39,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/popup_button"
+                style="?android:buttonBarButtonStyle"
+                android:padding="10dp"
                 android:text="@string/action_cancel"
                 android:textColor="@color/colorSharingDialogText" />
 
@@ -45,7 +49,9 @@
                 android:id="@+id/action_send_friend_request"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
+                android:background="@drawable/popup_button"
+                style="?android:buttonBarButtonStyle"
+                android:padding="10dp"
                 android:text="@string/action_send_request"
                 android:textColor="@color/colorSharingDialogText" />
         </LinearLayout>

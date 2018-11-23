@@ -7,6 +7,7 @@
     <color name="colorAccept">#91ff91</color>
     <color name="colorBackground">#d1e3ff</color>
     <color name="colorFriendsText">#81b1ff</color>
+    <color name="colorButtonPressed">#81b1ff</color>
     <color name="colorSharingDialogText">#FFFFFF</color>
     <color name="colorTabText">#3634af</color>
     <color name="colorSelectedItem">#3634af</color>

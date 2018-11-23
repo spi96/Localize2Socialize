@@ -31,4 +31,10 @@
     <string name="search_friends">Search friends</string>
     <string name="action_send_request">Send request</string>
     <string name="person_not_found">Person not found!</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="request_sent">Request sent!</string>
+    <string name="relationship_exists">Relationship exists!</string>
+    <string name="calendar_shared">Calendar successfully shared!</string>
+    <string name="no_events">No shareable events found!</string>
+    <string name="sharing_exists">Calendar already shared!</string>
 </resources>
