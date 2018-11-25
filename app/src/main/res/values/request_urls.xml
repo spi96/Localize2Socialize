@@ -14,5 +14,6 @@
     <string name="handleRequest">/relationship/handleRequest</string>
 
     <!--Event requests-->
-    <string name="shareCalendar">/relationship/shareCalendar</string>
+    <string name="shareCalendar">/sharings/shareCalendar</string>
+    <string name="getItemsForMap">/sharings/map</string>
 </resources>

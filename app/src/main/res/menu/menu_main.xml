@@ -3,24 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.spi.localize2socialize.view.MainActivity">
     <item
+        android:id="@+id/menu_search"
+        app:showAsAction="ifRoom"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_search_icon"
+        android:visible="true" />
+
+    <item
         android:id="@+id/menu_refresh"
         app:showAsAction="ifRoom"
         android:title="@string/menu_refresh"
         android:icon="@drawable/ic_refresh_icon" />
 
     <item
-        android:id="@+id/action_view_profile"
+        android:id="@+id/menu_settings"
+        app:showAsAction="never"
         android:orderInCategory="1"
-        android:title="@string/action_view_profile"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_view_sharings"
-        android:orderInCategory="2"
-        android:title="@string/action_view_sharings"
-        app:showAsAction="never" />
+        android:title="@string/menu_settings"
+        android:icon="@drawable/ic_map_settings" />
+
     <item
         android:id="@+id/action_sign_out"
-        android:orderInCategory="3"
+        android:orderInCategory="2"
         android:title="@string/action_sign_out"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:visible="true" />
 </menu>

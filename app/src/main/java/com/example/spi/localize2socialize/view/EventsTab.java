@@ -1,7 +1,7 @@
 package com.example.spi.localize2socialize.view;
 
 import android.Manifest;
-import android.app.Activity;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +20,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -28,11 +29,17 @@ import android.widget.LinearLayout;
 
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.viewmodel.EventsTabViewModel;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -44,11 +51,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
+
 public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapLongClickListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener, View.OnClickListener, RefreshClickListener {
     static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     static final int LOCATION_SERVICE_ENABLE_ACTION = 2;
     static final int READ_REQUEST_CODE = 3;
+    static final int PLACE_AUTOCOMPLETE_REQUEST_CODE = 4;
 
     private static final String TAG = "EventsTab";
     private static final String KEY_MYLASTLOCATION = "location";
@@ -73,6 +85,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         if (savedInstanceState != null) {
             mViewModel.setmLastKnownLocation((Location) savedInstanceState.getParcelable(KEY_MYLASTLOCATION));
@@ -99,15 +112,34 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        final Observer<List<MarkerOptions>> markerOptionsObserver = new Observer<List<MarkerOptions>>() {
+            @Override
+            public void onChanged(@Nullable List<MarkerOptions> markerOptions) {
+                if (markerOptions.size() > 0) {
+                    showEventsOnMap(markerOptions);
+                }
+            }
+        };
+
+        mViewModel = ViewModelProviders.of(this).get(EventsTabViewModel.class);
+        mViewModel.getMarkerOptionLiveData().observe(this, markerOptionsObserver);
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(EventsTabViewModel.class);
-        // TODO: Use the ViewModel
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.menu_search) {
+            showAutoCompleteSearch();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -121,10 +153,10 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mViewModel.loadSharings();
 
         setMapUI();
         setActionListeners(googleMap);
-
         getLocationPermission();
     }
 
@@ -164,6 +196,12 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         attachImageButton.setOnClickListener(this);
     }
 
+    private void showEventsOnMap(List<MarkerOptions> markerOptions) {
+        for (MarkerOptions markeOption : markerOptions) {
+            mMap.addMarker(markeOption);
+        }
+    }
+
     @Override
     public void onMapLongClick(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
@@ -175,6 +213,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
             mViewModel.getPostMarker().remove();
         }
         mViewModel.setPostMarker(mMap.addMarker(markerOptions));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
         postCardView.setVisibility(View.VISIBLE);
         new Handler().post(new Runnable() {
@@ -213,7 +252,6 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     getCurrentLocation();
                 }
         }
@@ -294,8 +332,17 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
                 getCurrentLocation();
                 break;
             case READ_REQUEST_CODE:
-                if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+                if (requestCode == READ_REQUEST_CODE && resultCode == RESULT_OK) {
                     imageSearchResultProcess(data);
+                }
+                break;
+            case PLACE_AUTOCOMPLETE_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    Place place = PlaceAutocomplete.getPlace(getContext(), data);
+                    onMapLongClick(place.getLatLng());
+                } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                    Status status = PlaceAutocomplete.getStatus(getContext(), data);
+                    Log.i(TAG, status.getStatusMessage());
                 }
                 break;
         }
@@ -356,6 +403,26 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     @Override
     public void onRefreshClick() {
-        //TOD
+        resetTab();
+        mMap.clear();
+        mViewModel.loadSharings();
+    }
+
+    private void showAutoCompleteSearch() {
+        try {
+            AutocompleteFilter typeFiler = new AutocompleteFilter.Builder()
+                    .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                    .setCountry(getContext().getResources().getConfiguration().getLocales().get(0).getCountry())
+                    .build();
+            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                    .setFilter(typeFiler)
+                    .build(getActivity());
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+
     }
 }

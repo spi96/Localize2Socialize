@@ -1,6 +1,8 @@
 package com.example.spi.localize2socialize.view;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,9 +14,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -57,7 +59,6 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         AdapterView.OnItemSelectedListener {
     private static final int CALENDAR_LOADER_ID = 1;
     private static final int EVENT_LOADER_ID = 2;
-    static final int REQUEST_SHOW_SHARING_DIALOG = 2;
     private final String DATE_FORMAT = "yyyy-MM-dd";
     private final String REQUEST_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
@@ -209,7 +210,7 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
                 onShareButtonClick();
                 break;
             case R.id.action_share_cancel:
-                dismiss();
+                closePopup("", Activity.RESULT_CANCELED);
                 break;
             case R.id.EndOfSharingET:
                 onEndOfSharingClick();
@@ -393,8 +394,7 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
                         String message = successful ? getResources().getString(R.string.calendar_shared) :
                                 getResources().getString(R.string.sharing_exists);
                         progressBar.setVisibility(View.GONE);
-                        showSnackbar(message);
-                        dismiss();
+                        closePopup(message, Activity.RESULT_OK);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -419,21 +419,26 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         shareButton.setEnabled(enabled);
     }
 
-    private void showSnackbar(String message) {
-        Snackbar.make(getActivity().findViewById(R.id.main_content), message, Snackbar.LENGTH_LONG).show();
-    }
-
     private boolean checkIfEventsEmpty() {
         if (events.size() == 0) {
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    showSnackbar(getResources().getString(R.string.no_events));
-                    dismiss();
+                    closePopup(getResources().getString(R.string.no_events), Activity.RESULT_OK);
                 }
             });
             return true;
         }
         return false;
+    }
+
+    private void closePopup(String message, int resultCode) {
+        Fragment target = getTargetFragment();
+        if (target != null) {
+            Intent intent = new Intent();
+            intent.putExtra("result", message);
+            target.onActivityResult(getTargetRequestCode(), resultCode, intent);
+        }
+        dismiss();
     }
 }

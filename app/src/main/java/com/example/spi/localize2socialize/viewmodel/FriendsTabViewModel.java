@@ -47,6 +47,7 @@ public class FriendsTabViewModel extends AndroidViewModel {
         if (friends == null) {
             friends = new MutableLiveData<>();
             loadFriends();
+            return new ArrayList<>();
         }
         return friends.getValue();
     }
@@ -55,6 +56,7 @@ public class FriendsTabViewModel extends AndroidViewModel {
         if (friendRequests == null) {
             friendRequests = new MutableLiveData<>();
             loadFriends();
+            return new ArrayList<>();
         }
         return friendRequests.getValue();
     }

@@ -2,9 +2,10 @@ package com.example.spi.localize2socialize.model;
 
 import java.util.Date;
 
-public class Event {
+public class Post {
     private Long id;
-    private String title;
+    private Account owner;
+    private String encodedAttachedImage;
     private String description;
     private Date startDate;
     private Date endDate;
@@ -12,19 +13,21 @@ public class Event {
     private Double locationLongitude;
     private String locationName;
 
-
-    public Event() {
+    public Post() {
     }
 
-    public Event(String title, String description, String eventLocation,
-                 Double locationLatitude, Double locationLongitude, Date dtStart, Date dtEnd) {
-        this.title = title;
+    public Post(Long id, Account owner, String encodedAttachedImage, String description,
+                Date startDate, Date endDate, Double locationLatitude,
+                Double locationLongitude, String locationName) {
+        this.id = id;
+        this.owner = owner;
+        this.encodedAttachedImage = encodedAttachedImage;
         this.description = description;
-        this.startDate = dtStart;
-        this.endDate = dtEnd;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.locationLatitude = locationLatitude;
         this.locationLongitude = locationLongitude;
-        this.locationName = eventLocation;
+        this.locationName = locationName;
     }
 
     public Long getId() {
@@ -35,12 +38,20 @@ public class Event {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public Account getOwner() {
+        return owner;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setOwner(Account owner) {
+        this.owner = owner;
+    }
+
+    public String getEncodedAttachedImage() {
+        return encodedAttachedImage;
+    }
+
+    public void setEncodedAttachedImage(String encodedAttachedImage) {
+        this.encodedAttachedImage = encodedAttachedImage;
     }
 
     public String getDescription() {

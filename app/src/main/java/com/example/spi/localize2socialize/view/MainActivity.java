@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+    private static final String TAG = "MainActivity";
 
     private MainActivityViewModel viewModel;
     private RefreshClickListener refreshClickListener;
@@ -81,6 +82,11 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 0:
+                        invalidateOptionsMenu();
+                        break;
+                }
             }
 
             @Override
@@ -89,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                     case 0:
                         EventsTab eventsTab = (EventsTab) getFragment(0);
                         eventsTab.resetTab();
+                        invalidateOptionsMenu();
                         break;
                 }
             }
@@ -129,6 +136,21 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem search = menu.findItem(R.id.menu_search);
+        MenuItem settings = menu.findItem(R.id.menu_settings);
+        if (tabLayout.getSelectedTabPosition() == 0) {
+            search.setVisible(true);
+            settings.setVisible(true);
+
+        } else {
+            search.setVisible(false);
+            settings.setVisible(false);
+        }
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_sign_out) {
@@ -139,7 +161,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
             if (refreshClickListener != null) {
                 refreshClickListener.onRefreshClick();
             }
+            return true;
         }
+
         return false;
     }
 
@@ -160,8 +184,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         switch (position) {
             case 0:
                 friendsTab.finishActionMode();
-                fab.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_map_settings));
-                fab.setOnClickListener(eventsTab); //TODO kezelni a tabon
+                fab.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.fab_post));
+                fab.setOnClickListener(eventsTab);
                 refreshClickListener = eventsTab;
                 break;
             case 1:

@@ -1,6 +1,7 @@
 package com.example.spi.localize2socialize.view;
 
 import android.Manifest;
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -93,8 +94,6 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
             @Override
             public void onChanged(@Nullable List<Account> friends) {
                 ((FriendsAdapter) friendsRecyclerView.getAdapter()).updateAdapter(friends);
-                //int friendsVisibility = friends.size() > 0 ? View.VISIBLE : View.INVISIBLE;
-                //friendsCardView.setVisibility(friendsVisibility);
             }
         };
 
@@ -168,7 +167,13 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        if (resultCode == Activity.RESULT_OK) {
+            String message = data.getStringExtra("result");
+            if (!message.equals("")) {
+                showSnackbar(message);
+                finishActionMode();
+            }
+        }
     }
 
     public void checkPermission() {
@@ -202,6 +207,10 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
         SearchDialog searchFriendsDialog = SearchDialog.newInstance(mViewModel.getAccount());
         searchFriendsDialog.setTargetFragment(this, REQUEST_SEARCH_FRIENDS_DIALOG);
         searchFriendsDialog.show(fragmentManager, SEARCHING_DIALOG_TAG);
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar.make(getActivity().findViewById(R.id.main_content), message, Snackbar.LENGTH_LONG).show();
     }
 
     @Override

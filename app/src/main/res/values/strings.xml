@@ -37,4 +37,6 @@
     <string name="calendar_shared">Calendar successfully shared!</string>
     <string name="no_events">No shareable events found!</string>
     <string name="sharing_exists">Calendar already shared!</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_settings">Settings</string>
 </resources>
