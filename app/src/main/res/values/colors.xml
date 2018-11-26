@@ -11,7 +11,7 @@
     <color name="colorSharingDialogText">#FFFFFF</color>
     <color name="colorTabText">#3634af</color>
     <color name="colorSelectedItem">#3634af</color>
-    <color name="colorSeparator">#d1e3ff</color>
+    <color name="colorDetails">#58d1e3ff</color>
     <color name="colorPostBackground">#FFFFFF</color>
     <color name="colorTextSelectedItem">#FFFFFF</color>
     <color name="colorBackgroundNotSelectedItem">#FFFFFF</color>

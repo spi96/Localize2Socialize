@@ -176,7 +176,7 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
     private boolean validateDialog() {
         try {
             if (endOfSharingET.getText().length() == 0) {
-                textInputLayout.setError(getActivity().getString(R.string.end_of_sharing_empty));
+                textInputLayout.setError(getActivity().getString(R.string.required));
                 return false;
             }
             if (simpleDateFormat.parse(endOfSharingET.getText().toString()).before(android.icu.util.Calendar.getInstance().getTime())) {

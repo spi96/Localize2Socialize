@@ -16,10 +16,9 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Account owner, String encodedAttachedImage, String description,
+    public Post(Account owner, String encodedAttachedImage, String description,
                 Date startDate, Date endDate, Double locationLatitude,
                 Double locationLongitude, String locationName) {
-        this.id = id;
         this.owner = owner;
         this.encodedAttachedImage = encodedAttachedImage;
         this.description = description;

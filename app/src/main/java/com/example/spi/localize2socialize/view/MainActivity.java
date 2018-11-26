@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.spi.localize2socialize.Global;
 import com.example.spi.localize2socialize.R;
@@ -85,7 +86,10 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
                 switch (tab.getPosition()) {
                     case 0:
                         invalidateOptionsMenu();
+                        floatingActionButton.setVisibility(View.GONE);
                         break;
+                    case 1:
+                        floatingActionButton.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -109,7 +113,10 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
     }
 
     private void setUpFragments(SectionsPagerAdapter sectionsPagerAdapter) {
-        sectionsPagerAdapter.addFragment(EventsTab.newInstance(), "Events");
+        EventsTab eventsTab = EventsTab.newInstance();
+        refreshClickListener = eventsTab;
+        floatingActionButton.setOnClickListener(eventsTab);
+        sectionsPagerAdapter.addFragment(eventsTab, "Events");
         sectionsPagerAdapter.addFragment(FriendsTab.newInstance(), "Friends");
     }
 
@@ -233,11 +240,4 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         viewModel.signOut(this, mGoogleSignInClient);
     }
-
-    /*private void hideKeyboard(View view) {
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }*/
 }

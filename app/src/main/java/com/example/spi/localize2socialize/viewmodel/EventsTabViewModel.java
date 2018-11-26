@@ -3,8 +3,11 @@ package com.example.spi.localize2socialize.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -15,11 +18,8 @@ import com.example.spi.localize2socialize.Global;
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.model.Account;
 import com.example.spi.localize2socialize.model.Calendar;
-import com.example.spi.localize2socialize.model.Event;
 import com.example.spi.localize2socialize.model.Post;
 import com.example.spi.localize2socialize.net.RequestQueueSingleton;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
@@ -30,16 +30,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class EventsTabViewModel extends AndroidViewModel {
     private final String REQUEST_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private MutableLiveData<List<MarkerOptions>> markerOptions = new MutableLiveData<>();
 
+    private MutableLiveData<List<Calendar>> calendars = new MutableLiveData<>();
+    private MutableLiveData<List<Post>> posts = new MutableLiveData<>();
+
     private Marker postMarker;
     private Location mLastKnownLocation;
+    private Bitmap postAttachedImage;
+    private String postDescription;
+    private String postLocationName;
 
     public EventsTabViewModel(@NonNull Application application) {
         super(application);
@@ -61,17 +69,54 @@ public class EventsTabViewModel extends AndroidViewModel {
         this.mLastKnownLocation = mLastKnownLocation;
     }
 
-    public MutableLiveData<List<MarkerOptions>> getMarkerOptionLiveData() {
-        return markerOptions;
+    public MutableLiveData<List<Calendar>> getCalendarLiveData() {
+        return calendars;
     }
 
-    public List<MarkerOptions> getMarkerOptionList() {
-        if (markerOptions == null) {
-            markerOptions = new MutableLiveData<>();
+    public MutableLiveData<List<Post>> getPostLiveData() {
+        return posts;
+    }
+
+    public List<Calendar> getCalendars() {
+        if (calendars == null) {
+            calendars = new MutableLiveData<>();
             loadSharings();
             return new ArrayList<>();
         }
-        return markerOptions.getValue();
+        return calendars.getValue();
+    }
+
+    public List<Post> getPosts() {
+        if (posts == null) {
+            posts = new MutableLiveData<>();
+            loadSharings();
+            return new ArrayList<>();
+        }
+        return posts.getValue();
+    }
+
+    public String getPostDescription() {
+        return postDescription;
+    }
+
+    public void setPostDescription(String postDescription) {
+        this.postDescription = postDescription;
+    }
+
+    public Bitmap getPostAttachedImage() {
+        return postAttachedImage;
+    }
+
+    public void setPostAttachedImage(Bitmap postAttachedImage) {
+        this.postAttachedImage = postAttachedImage;
+    }
+
+    public String getPostLocationName() {
+        return postLocationName;
+    }
+
+    public void setPostLocationName(String postLocationName) {
+        this.postLocationName = postLocationName;
     }
 
     public void loadSharings() {
@@ -88,7 +133,7 @@ public class EventsTabViewModel extends AndroidViewModel {
     }
 
     private JSONObject createRequest(Object request) throws JSONException {
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().setDateFormat(REQUEST_DATE_FORMAT).create();
         return new JSONObject(gson.toJson(request));
     }
 
@@ -105,6 +150,11 @@ public class EventsTabViewModel extends AndroidViewModel {
                 try {
                     if (response.has("calendars") && response.has("posts")) {
                         convertResponse(response);
+                    } else if (response.has("postResponse")) {
+                        boolean successful = response.getBoolean("postResponse");
+                        if (successful) {
+
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -136,35 +186,39 @@ public class EventsTabViewModel extends AndroidViewModel {
 
         Gson gson = new GsonBuilder().setDateFormat(REQUEST_DATE_FORMAT).create();
 
-        //deleteExistingMarkers(); TODO
-        List<Calendar> calendars = gson.fromJson(calendarJson, calendarListType);
-        List<Post> posts = gson.fromJson(postJson, postListType);
-        convertItemsToMarkerOption(calendars, posts);
+        List<Calendar> calendarList = gson.fromJson(calendarJson, calendarListType);
+        List<Post> postList = gson.fromJson(postJson, postListType);
+        calendars.setValue(calendarList);
+        posts.setValue(postList);
     }
 
-    private void convertItemsToMarkerOption(List<Calendar> calendars, List<Post> posts) {
-        List<MarkerOptions> eventMarkers = new ArrayList<>();
-        for (Calendar calendar : calendars) {
-            for (Event event : calendar.getEvents()) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(new LatLng(event.getLocationLatitude(), event.getLocationLongitude()))
-                        //.title(event.getTitle())
-                        //.snippet(event.getLocationName())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                        .draggable(false);
-                eventMarkers.add(markerOptions);
-            }
-        }
+    private String encodePhoto(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        byte[] byteArray = stream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
 
-        for (Post post : posts) {
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(new LatLng(post.getLocationLatitude(), post.getLocationLongitude()))
-                    .title(post.getDescription())
-                    .snippet(post.getLocationName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
-                    .draggable(false);
-            eventMarkers.add(markerOptions);
+    public Bitmap decodePhoto(String encoded) {
+        byte[] decoded = Base64.decode(encoded, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+    }
+
+    public void savePost(String postDescription) {
+        this.postDescription = postDescription;
+        String encodedPhoto = postAttachedImage == null ? "" : encodePhoto(postAttachedImage);
+        Account account = ((Global) getApplication()).getUser();
+        Date current = android.icu.util.Calendar.getInstance().getTime();
+        Post post = new Post(account, encodedPhoto, postDescription, current, current,
+                postMarker.getPosition().latitude, postMarker.getPosition().longitude, postLocationName);
+        JSONObject request = null;
+        try {
+            request = createRequest(post);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        markerOptions.setValue(eventMarkers);
+        String url = getApplication().getResources().
+                getString(R.string.baseUrl) + getApplication().getResources().getString(R.string.savePost);
+        sendRequest(url, Request.Method.POST, request);
     }
 }
