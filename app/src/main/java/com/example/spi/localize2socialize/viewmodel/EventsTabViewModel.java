@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -108,6 +109,7 @@ public class EventsTabViewModel extends AndroidViewModel {
     }
 
     public void setPostAttachedImage(Bitmap postAttachedImage) {
+        if (this.postAttachedImage != null) this.postAttachedImage.recycle();
         this.postAttachedImage = postAttachedImage;
     }
 
@@ -140,6 +142,7 @@ public class EventsTabViewModel extends AndroidViewModel {
     private void sendRequest(String url, int method, JSONObject jsonRequest) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, url, jsonRequest,
                 getResponseListener(), getResponseErrorListener());
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(0, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestQueueSingleton.getInstance(getApplication()).addToRequestQueue(jsonObjectRequest);
     }
 
@@ -194,7 +197,7 @@ public class EventsTabViewModel extends AndroidViewModel {
 
     private String encodePhoto(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
         byte[] byteArray = stream.toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }

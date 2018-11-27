@@ -6,13 +6,13 @@ import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.spi.localize2socialize.Global;
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.model.Account;
+import com.example.spi.localize2socialize.model.DeleteRelationshipsRequest;
 import com.example.spi.localize2socialize.model.Friend;
 import com.example.spi.localize2socialize.model.GetRelationshipsRequest;
 import com.example.spi.localize2socialize.model.HandleRelationshipRequest;
@@ -29,6 +29,8 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import static com.android.volley.Request.Method.POST;
 
 public class FriendsTabViewModel extends AndroidViewModel {
     private Account account;
@@ -84,7 +86,7 @@ public class FriendsTabViewModel extends AndroidViewModel {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        sendRequest(url, Request.Method.POST, jsonObject);
+        sendRequest(url, POST, jsonObject);
     }
 
     private JSONObject createRequest(Object request) throws JSONException {
@@ -123,6 +125,11 @@ public class FriendsTabViewModel extends AndroidViewModel {
                             displayedRequests.remove(senderPerson);
                             friendRequests.setValue(displayedRequests);
                         }
+                    } else if (response.has("relationshipDelete")) {
+                        List<Account> deletedFriends = convertResponseToList(response, "relationshipDelete");
+                        List<Account> displayedFriends = friends.getValue();
+                        displayedFriends.removeAll(deletedFriends);
+                        friends.setValue(displayedFriends);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -163,6 +170,15 @@ public class FriendsTabViewModel extends AndroidViewModel {
         loadFriends();
     }
 
+    public void deleteFriends(List<Account> selectedFriends) throws JSONException {
+        String url = getApplication().getResources().
+                getString(R.string.baseUrl) + getApplication().getResources().getString(R.string.deleteRelationships);
+
+        DeleteRelationshipsRequest request = new DeleteRelationshipsRequest(selectedFriends, account);
+        JSONObject jsonObject = createRequest(request);
+        sendRequest(url, POST, jsonObject);
+    }
+
     public void handleFriendRequest(Account sender, boolean isAccepted) {
         String url = getApplication().getResources().
                 getString(R.string.baseUrl) + getApplication().getResources().getString(R.string.handleRequest);
@@ -174,7 +190,7 @@ public class FriendsTabViewModel extends AndroidViewModel {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        sendRequest(url, Request.Method.POST, jsonObject);
+        sendRequest(url, POST, jsonObject);
     }
 
     //MOCK

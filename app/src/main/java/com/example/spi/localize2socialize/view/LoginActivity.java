@@ -17,18 +17,12 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class LoginActivity extends AppCompatActivity {
 
     private static final int RC_SING_IN = 34545;
     private static final String TAG = LoginActivity.class.getName();
 
     private GoogleSignInClient mGoogleSignInClient = null;
-
-    private View mProgressView;
-    private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +39,6 @@ public class LoginActivity extends AppCompatActivity {
                 attemptLogin();
             }
         });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -93,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUI(GoogleSignInAccount account) {
-        Intent intent = new Intent(this, MainActivity.class);           //TODO kezelni ha account null
+        Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("ACCOUNT", account);
 
         startActivity(intent);

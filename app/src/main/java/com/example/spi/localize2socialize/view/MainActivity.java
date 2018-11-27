@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -27,7 +26,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,12 +52,9 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
         final Global global = (Global) getApplication();
 
         Bitmap photo = null;  //TODO Glide.with(this).load(account.getPhotoUrl()).into(PhotoImageview);
-        try {
-            if (account.getPhotoUrl() != null)
-                photo = MediaStore.Images.Media.getBitmap(getContentResolver(), account.getPhotoUrl()); //TODO
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        if (account.getPhotoUrl() != null) ;
+        //photo = MediaStore.Images.Media.getBitmap(getContentResolver(), account.getPhotoUrl()); //TODO
 
         viewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
         viewModel.setUser(account, photo);
@@ -69,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
         floatingActionButton = findViewById(R.id.fab);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        if (account.getEmail() != null && !account.getEmail().equals(""))
+            toolbar.setTitle(account.getEmail().split("@")[0]);
         setSupportActionBar(toolbar);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -114,10 +111,12 @@ public class MainActivity extends AppCompatActivity implements ViewPager.OnPageC
 
     private void setUpFragments(SectionsPagerAdapter sectionsPagerAdapter) {
         EventsTab eventsTab = EventsTab.newInstance();
+        FriendsTab friendsTab = FriendsTab.newInstance();
+        friendsTab.setFriendsChangeListener(eventsTab);
         refreshClickListener = eventsTab;
         floatingActionButton.setOnClickListener(eventsTab);
         sectionsPagerAdapter.addFragment(eventsTab, "Events");
-        sectionsPagerAdapter.addFragment(FriendsTab.newInstance(), "Friends");
+        sectionsPagerAdapter.addFragment(friendsTab, "Friends");
     }
 
     @Override

@@ -167,10 +167,6 @@ public class ShareDialog extends DialogFragment implements View.OnClickListener,
         disableButtons(false);
 
         getLoaderManager().restartLoader(ShareDialog.EVENT_LOADER_ID, null, this);
-
-        /*Intent intent = new Intent();
-        intent.putExtra("Deadline", calendar.getTime());
-        getTargetFragment().onActivityResult(getTargetRequestCode(), RESULT_OK, intent);*/
     }
 
     private boolean validateDialog() {

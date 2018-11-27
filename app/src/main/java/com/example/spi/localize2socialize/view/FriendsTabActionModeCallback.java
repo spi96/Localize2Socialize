@@ -38,6 +38,8 @@ public class FriendsTabActionModeCallback implements ActionMode.Callback {
                 friendsAdapter.selectAll();
                 updateActionModeTitle();
                 break;
+            case R.id.action_delete:
+                deleteFriends();
         }
         return false;
     }
@@ -54,5 +56,9 @@ public class FriendsTabActionModeCallback implements ActionMode.Callback {
 
     private void updateActionModeTitle() {
         ((FriendsTab) ((MainActivity) context).getFragment(1)).updateActionModeTitle(friendsAdapter);
+    }
+
+    private void deleteFriends() {
+        ((FriendsTab) ((MainActivity) context).getFragment(1)).deleteFriends();
     }
 }

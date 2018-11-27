@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,6 +30,8 @@ import com.example.spi.localize2socialize.view.adapters.FriendRequestAdapter;
 import com.example.spi.localize2socialize.view.adapters.FriendsAdapter;
 import com.example.spi.localize2socialize.viewmodel.FriendsTabViewModel;
 
+import org.json.JSONException;
+
 import java.util.List;
 
 public class FriendsTab extends Fragment implements View.OnClickListener, RefreshClickListener, OnViewHolderButtonsClickListener {
@@ -42,7 +46,7 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
 
     private RecyclerView requestRecyclerView;
     private RecyclerView friendsRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private FriendsChangeListener friendsChangeListener;
     CardView friendRequestCardView;
     CardView friendsCardView;
 
@@ -93,7 +97,11 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
 
             @Override
             public void onChanged(@Nullable List<Account> friends) {
-                ((FriendsAdapter) friendsRecyclerView.getAdapter()).updateAdapter(friends);
+                FriendsAdapter adapter = (FriendsAdapter) friendsRecyclerView.getAdapter();
+                if (!(adapter.getFriends().size() == friends.size() && adapter.getFriends().containsAll(friends))) {
+                    friendsChangeListener.onFriendsChange();
+                    ((FriendsAdapter) friendsRecyclerView.getAdapter()).updateAdapter(friends);
+                }
             }
         };
 
@@ -186,6 +194,34 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
         }
     }
 
+    public void deleteFriends() {
+        if (!checkFriendSelected()) return;
+        showConfirmPopup();
+    }
+
+    private void showConfirmPopup() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.confirm_title)
+                .setMessage(R.string.confirm_message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                try {
+                    mViewModel.deleteFriends(((FriendsAdapter) friendsRecyclerView.getAdapter()).getSelectedFriends());
+                    finishActionMode();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private boolean checkFriendSelected() {
         if (((FriendsAdapter) friendsRecyclerView.getAdapter()).getSelectedFriendsCount() == 0) {
             Snackbar.make(getActivity().findViewById(R.id.main_content), R.string.no_friend_selected, Snackbar.LENGTH_LONG).show();
@@ -244,5 +280,9 @@ public class FriendsTab extends Fragment implements View.OnClickListener, Refres
     public void buttonClicked(int position, boolean isAccepted) {
         Account request = ((FriendRequestAdapter) requestRecyclerView.getAdapter()).getRequest(position);
         mViewModel.handleFriendRequest(request, isAccepted);
+    }
+
+    public void setFriendsChangeListener(FriendsChangeListener listener) {
+        friendsChangeListener = listener;
     }
 }

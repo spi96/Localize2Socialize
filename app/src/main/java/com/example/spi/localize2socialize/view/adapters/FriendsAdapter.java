@@ -98,7 +98,8 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
 
     public void updateAdapter(List<Account> friends) {
         this.friends.clear();
-        this.friends.addAll(friends);
+        if (friends != null)
+            this.friends.addAll(friends);
         notifyDataSetChanged();
     }
 
@@ -114,5 +115,9 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendsV
             }
         }
         return selectedFriendList;
+    }
+
+    public List<Account> getFriends() {
+        return friends;
     }
 }

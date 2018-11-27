@@ -24,7 +24,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -37,6 +36,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.spi.localize2socialize.R;
 import com.example.spi.localize2socialize.model.Calendar;
 import com.example.spi.localize2socialize.model.Event;
@@ -69,7 +70,8 @@ import java.util.List;
 import static android.app.Activity.RESULT_OK;
 
 public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, TextWatcher,
-        GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener, View.OnClickListener, RefreshClickListener {
+        GoogleMap.OnMapClickListener, GoogleMap.OnMyLocationButtonClickListener, View.OnClickListener, RefreshClickListener,
+        FriendsChangeListener {
     static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     static final int LOCATION_SERVICE_ENABLE_ACTION = 2;
     static final int READ_REQUEST_CODE = 3;
@@ -88,7 +90,9 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     private TextView eventDateStartTV;
     private TextView eventDateEndTV;
     private TextView eventLocationTV;
+    private TextView eventOwnerTV;
     private ImageView eventImage;
+    private LinearLayout eventDetailLayout;
 
     private EventsTabViewModel mViewModel;
 
@@ -131,6 +135,8 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         eventDateEndTV = view.findViewById(R.id.eventEndDate);
         eventLocationTV = view.findViewById(R.id.eventLocation);
         eventImage = view.findViewById(R.id.eventImageIV);
+        eventOwnerTV = view.findViewById(R.id.eventDetailOwner);
+        eventDetailLayout = view.findViewById(R.id.eventDetailLayout);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -239,6 +245,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
             for (Event event : calendar.getEvents()) {
                 Marker marker = mMap.addMarker(createMarkerOption(event));
                 marker.setTag(event);
+                marker.setTitle(calendar.getOwner().toString());
             }
         }
     }
@@ -264,7 +271,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     public void postLocation(LatLng latLng) {
         if (eventDetailsCV.getVisibility() == View.VISIBLE) {
-            fillEventDescriptionView("", "", null, null, "");
+            fillEventDescriptionView("", "", null, null, "", "");
             eventDetailsCV.setVisibility(View.GONE);
         }
 
@@ -298,32 +305,32 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         if (marker.getTag() instanceof Event) {
             Event event = (Event) marker.getTag();
             fillEventDescriptionView(event.getTitle(), event.getDescription(), event.getStartDate(),
-                    event.getEndDate(), event.getLocationName());
+                    event.getEndDate(), event.getLocationName(), marker.getTitle());
+            eventImage.setVisibility(View.GONE);
+            eventDetailLayout.setLayoutParams(
+                    new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         } else if (marker.getTag() instanceof Post) {
             Post post = (Post) marker.getTag();
             fillEventDescriptionView(post.getDescription(), "", post.getStartDate(),
-                    null, post.getLocationName());
+                    null, post.getLocationName(), post.getOwner().toString());
             if (post.getEncodedAttachedImage() != null && !post.getEncodedAttachedImage().equals("")) {
-                Bitmap bitmap = scaleImageToFitView(mViewModel.decodePhoto(post.getEncodedAttachedImage()));
-                eventImage.setImageBitmap(bitmap);
+                eventImage.setVisibility(View.VISIBLE);
+                Glide
+                        .with(this)
+                        .load(mViewModel.decodePhoto(post.getEncodedAttachedImage()))
+                        .apply(new RequestOptions().override(370, 400))
+                        .into(eventImage);
+
+                eventDetailLayout.setLayoutParams(
+                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
             }
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
         return true;
     }
 
-    private Bitmap scaleImageToFitView(Bitmap bitmap) {
-        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        Bitmap scaledBitmap = null;
-        if (bitmap.getWidth() > bitmap.getHeight()) {
-            scaledBitmap = scaleToFitWidth(bitmap, displayMetrics.widthPixels / 2);
-        } else {
-            scaledBitmap = scaleToFitHeight(bitmap, displayMetrics.heightPixels / 3);
-        }
-        return scaledBitmap;
-    }
-
-    private void fillEventDescriptionView(String title, String description, Date dateStart, Date dateEnd, String locationName) {
+    private void fillEventDescriptionView(String title, String description, Date dateStart, Date dateEnd,
+                                          String locationName, String ownerName) {
         SimpleDateFormat simpleDate = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         String start = dateStart == null ? "" : simpleDate.format(dateStart);
@@ -334,6 +341,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         eventDateStartTV.setText(start);
         eventDateEndTV.setText(end);
         eventLocationTV.setText(locationName);
+        eventOwnerTV.setText(ownerName);
     }
 
     @Override
@@ -493,7 +501,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         }
 
         if (eventDetailsCV.getVisibility() == View.VISIBLE) {
-            fillEventDescriptionView("", "", null, null, "");
+            fillEventDescriptionView("", "", null, null, "", "");
             eventDetailsCV.setVisibility(View.GONE);
         }
     }
@@ -526,16 +534,6 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     }
 
-    private Bitmap scaleToFitWidth(Bitmap b, int width) {
-        float factor = width / (float) b.getWidth();
-        return Bitmap.createScaledBitmap(b, width, (int) (b.getHeight() * factor), true);
-    }
-
-    private Bitmap scaleToFitHeight(Bitmap b, int height) {
-        float factor = height / (float) b.getHeight();
-        return Bitmap.createScaledBitmap(b, (int) (b.getWidth() * factor), height, true);
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -543,7 +541,7 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
                 performFileSearch();
                 break;
             case R.id.fab:
-                savePost();
+                showConfirmPopup();
                 break;
         }
     }
@@ -573,14 +571,10 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     }
 
     private void savePost() {
-        if (postEditText.getText() == null || postEditText.getText().toString().equals("")) {
-            postEditText.requestFocus();
-            postEditText.setError(getResources().getString(R.string.required));
-            return;
-        }
         mViewModel.savePost(postEditText.getText().toString());
         resetTab();
     }
+
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -601,5 +595,42 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
 
     private void showSnackbar(String message) {
         Snackbar.make(getActivity().findViewById(R.id.main_content), message, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onFriendsChange() {
+        mMap.clear();
+        mViewModel.loadSharings();
+    }
+
+    private void showConfirmPopup() {
+        boolean valid = validatePost();
+        if (!valid)
+            return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.confirm_post_title)
+                .setMessage(R.string.confirm_message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                savePost();
+            }
+        });
+
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private boolean validatePost() {
+        if (postEditText.getText() == null || postEditText.getText().toString().equals("")) {
+            postEditText.requestFocus();
+            postEditText.setError(getResources().getString(R.string.required));
+            return false;
+        }
+        return true;
     }
 }

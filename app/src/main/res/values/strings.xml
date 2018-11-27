@@ -41,4 +41,10 @@
     <string name="menu_settings">Settings</string>
     <string name="attachedImage">Attached image</string>
     <string name="img_attached">Image attached!</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="confirm_message">Are you sure?</string>
+    <string name="confirm_title">Delete friends</string>
+    <string name="confirm_post_title">Post</string>
+    <string name="please_sign_in">Please sign in</string>
 </resources>
