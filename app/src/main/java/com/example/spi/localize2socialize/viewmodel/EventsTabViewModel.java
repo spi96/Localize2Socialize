@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.android.volley.DefaultRetryPolicy.DEFAULT_TIMEOUT_MS;
+
 public class EventsTabViewModel extends AndroidViewModel {
     private final String REQUEST_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private MutableLiveData<List<MarkerOptions>> markerOptions = new MutableLiveData<>();
@@ -142,7 +144,7 @@ public class EventsTabViewModel extends AndroidViewModel {
     private void sendRequest(String url, int method, JSONObject jsonRequest) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method, url, jsonRequest,
                 getResponseListener(), getResponseErrorListener());
-        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(0, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(3 * DEFAULT_TIMEOUT_MS, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         RequestQueueSingleton.getInstance(getApplication()).addToRequestQueue(jsonObjectRequest);
     }
 
@@ -156,7 +158,6 @@ public class EventsTabViewModel extends AndroidViewModel {
                     } else if (response.has("postResponse")) {
                         boolean successful = response.getBoolean("postResponse");
                         if (successful) {
-
                         }
                     }
                 } catch (JSONException e) {
