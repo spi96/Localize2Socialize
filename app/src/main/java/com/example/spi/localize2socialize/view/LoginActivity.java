@@ -19,7 +19,7 @@ import com.google.android.gms.tasks.Task;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final int RC_SING_IN = 34545;
+    private static final int RC_SIGN_IN = 34545;
     private static final String TAG = LoginActivity.class.getName();
 
     private GoogleSignInClient mGoogleSignInClient = null;
@@ -60,14 +60,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void attemptLogin() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SING_IN);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == Activity.RESULT_OK && requestCode == RC_SING_IN) {
+        if (resultCode == Activity.RESULT_OK && requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignedInResult(task);
         }

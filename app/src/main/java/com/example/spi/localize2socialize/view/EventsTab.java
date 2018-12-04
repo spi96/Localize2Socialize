@@ -109,10 +109,30 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        mViewModel = ViewModelProviders.of(this).get(EventsTabViewModel.class);
         if (savedInstanceState != null) {
             mViewModel.setmLastKnownLocation((Location) savedInstanceState.getParcelable(KEY_MYLASTLOCATION));
         }
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+
+        final Observer<List<Calendar>> calendarObserver = new Observer<List<Calendar>>() {
+            @Override
+            public void onChanged(@Nullable List<Calendar> calendars) {
+                if (!calendars.isEmpty())
+                    showEventsOnMap(calendars);
+            }
+        };
+
+        final Observer<List<Post>> postObserver = new Observer<List<Post>>() {
+            @Override
+            public void onChanged(@Nullable List<Post> posts) {
+                if (!posts.isEmpty())
+                    showPostsOnMap(posts);
+            }
+        };
+
+        mViewModel.getCalendarLiveData().observe(this, calendarObserver);
+        mViewModel.getPostLiveData().observe(this, postObserver);
     }
 
     @Override
@@ -124,6 +144,10 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.events_tab_fragment, container, false);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
         postEditText = view.findViewById(R.id.postEditText);
         attachImageButton = view.findViewById(R.id.attachImage);
         linearLayout = view.findViewById(R.id.postLayout);
@@ -138,29 +162,6 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
         eventOwnerTV = view.findViewById(R.id.eventDetailOwner);
         eventDetailLayout = view.findViewById(R.id.eventDetailLayout);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        final Observer<List<Calendar>> calendarObserver = new Observer<List<Calendar>>() {
-            @Override
-            public void onChanged(@Nullable List<Calendar> calendars) {
-                if (!calendars.isEmpty())
-                    showEventsOnMap(calendars);
-            }
-        };
-
-
-        final Observer<List<Post>> postObserver = new Observer<List<Post>>() {
-            @Override
-            public void onChanged(@Nullable List<Post> posts) {
-                if (!posts.isEmpty())
-                    showPostsOnMap(posts);
-            }
-        };
-
-        mViewModel = ViewModelProviders.of(this).get(EventsTabViewModel.class);
-        mViewModel.getCalendarLiveData().observe(this, calendarObserver);
-        mViewModel.getPostLiveData().observe(this, postObserver);
         return view;
     }
 
@@ -190,11 +191,12 @@ public class EventsTab extends Fragment implements OnMapReadyCallback, GoogleMap
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        getLocationPermission();
         mViewModel.loadSharings();
 
         setMapUI();
         setActionListeners(googleMap);
-        getLocationPermission();
+
     }
 
     private void setMapUI() {
