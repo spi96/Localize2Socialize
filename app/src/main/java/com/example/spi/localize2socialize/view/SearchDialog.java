@@ -105,7 +105,7 @@ public class SearchDialog extends DialogFragment implements View.OnClickListener
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (s.length() > 1) {
+        if (s.length() > 2) {
             searchAccounts(s);
         }
         if (autoCompleteTextView.getError() != null && autoCompleteTextView.getError().length() > 0) {
